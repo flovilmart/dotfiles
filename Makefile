@@ -1,5 +1,5 @@
 .PHONY: all
-all: dotfiles## Installs the bin and etc directory files and the dotfiles.
+all: dotfiles fonts ## Installs the bin and etc directory files and the dotfiles.
 
 #.PHONY: bin
 #bin: ## Installs the bin directory files.
@@ -16,6 +16,10 @@ dotfiles: ## Installs the dotfiles.
 		ln -sfn $$file $(HOME)/$$f; \
 	done; \
 	ln -sfn $(CURDIR)/.oh-my-zsh/themes/flo.zsh-theme $(HOME)/.oh-my-zsh/themes/flo.zsh-theme; \
+
+.PHONY: fonts
+fonts:
+	cp -R $(CURDIR)/fonts/* $(HOME)/Library/fonts/; 
 
 
 #.PHONY: test
