@@ -122,15 +122,15 @@ endfunction
 	"" Vundle bundle manager 
 	""     -> Bundle manager. To download/update bundles execute: vim +BundleInstall +qall 
 	""
-		set rtp+=~/.vim/bundle/vundle/
+		set rtp+=~/.vim/bundle/Vundle.vim/
 		call vundle#rc()
-		Bundle 'gmarik/vundle'
+		Bundle 'VundleVim/Vundle.vim'
 
 	""
 	"" Nerdtree
 	""     -> Show a file tree when you press ctrl-e, select current file <leader> e
 	""
-		Bundle 'scrooloose/nerdtree'
+		Bundle 'nerdtree'
 		map <C-e> :NERDTreeToggle<CR>:NERDTreeMirror<CR>
 		map <Leader>e :NERDTreeFind<CR>
 
@@ -272,3 +272,5 @@ endfunction
 		source ~/.vimrc.local
 	endif
 
+execute pathogen#infect()
+call pathogen#helptags()
