@@ -59,8 +59,18 @@ export JIRA_URL=https://amp-me.atlassian.net/projects/AMPME
 JIRA_RAPID_BOARD="true"
 
 # User configuration
+if [ -d "$HOME/google-cloud-sdk" ];
+then
+  export PATH="$PATH:$HOME/google-cloud-sdk/bin"
+  # The next line updates PATH for the Google Cloud SDK.
+  source "$HOME/google-cloud-sdk/path.zsh.inc"
+  
+  # The next line enables shell command completion for gcloud.
+  source "$HOME/google-cloud-sdk/completion.zsh.inc"
+fi;
 
-export PATH="$PATH:$HOME/google-cloud-sdk/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Applications/Server.app/Contents/ServerRoot/usr/bin:/Applications/Server.app/Contents/ServerRoot/usr/sbin:/usr/local/git/bin:/usr/local/MacGPG2/bin:/usr/local/eb/linux/python2.7/:/usr/local/share/npm/bin:$HOME/.rvm/bin:/usr/local/share/npm/bin"
+
+export PATH="$PATH:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Applications/Server.app/Contents/ServerRoot/usr/bin:/Applications/Server.app/Contents/ServerRoot/usr/sbin:/usr/local/git/bin:/usr/local/MacGPG2/bin:/usr/local/eb/linux/python2.7/:/usr/local/share/npm/bin:$HOME/.rvm/bin:/usr/local/share/npm/bin"
 
 export PATH="$PATH:./node_modules/.bin"
 export PATH="$PATH:$HOME/go/bin"
@@ -93,11 +103,6 @@ alias tmux="TERM=screen-256color-bce tmux"
 alias mux="tmuxinator"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-# The next line updates PATH for the Google Cloud SDK.
-source "$HOME/google-cloud-sdk/path.zsh.inc"
-
-# The next line enables shell command completion for gcloud.
-source "$HOME/google-cloud-sdk/completion.zsh.inc"
 
 # Added by MiregoGradle
 autoload -U add-zsh-hook
@@ -121,8 +126,10 @@ load-nvmrc() {
 add-zsh-hook chpwd load-nvmrc
 load-nvmrc
 
-
-source ~/.cargo/env
+if [ -f "~/.cargo/env" ];
+then;
+  source ~/.cargo/env
+fi;
 
 # Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
 export PATH="$PATH:$HOME/.rvm/bin"
