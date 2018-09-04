@@ -16,6 +16,7 @@ dotfiles: ## Installs the dotfiles.
 		ln -sfn $$file $(HOME)/$$f; \
 	done; \
 	ln -sfn $(CURDIR)/.oh-my-zsh/themes/flo.zsh-theme $(HOME)/.oh-my-zsh/themes/flo.zsh-theme; \
+	ln -sfn $(CURDIR)/.tmuxinator/default.yml $(HOME)/.tmuxinator/default.yml
 
 .PHONY: fonts
 fonts:
