@@ -1,0 +1,31 @@
+[user]
+	name = Florent Vilmart
+	email = florent@flovilmart.com
+	signingkey = 4A0441A2
+[core]
+	excludesfile = ~/.gitignore_global
+[push]
+	default = current
+[http]
+	postBuffer = 52428800
+[credential]
+	helper = osxkeychain
+[pull]
+	rebase = true
+[rebase]
+	autosquash = true
+
+# [filter "media"]
+# 	required = true
+# 	clean = git media clean %f
+# 	smudge = git media smudge %f
+# [filter "lfs"]
+# 	clean = git-lfs clean -- %f
+# 	smudge = git-lfs smudge -- %f
+# 	required = true
+# [difftool "sourcetree"]
+# 	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+# 	path = 
+# [mergetool "sourcetree"]
+# 	cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+# 	trustExitCode = true
