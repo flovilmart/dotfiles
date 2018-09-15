@@ -23,6 +23,7 @@ fonts:
 
 .PHONY: vim
 vim:
+	git submodule update --init --recursive
 	ln -sfn $(CURDIR)/vimrc $(HOME)/.vim_runtime
 	sh $(HOME)/.vim_runtime/install_awesome_vimrc.sh
 	
