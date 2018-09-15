@@ -71,7 +71,7 @@ then
 fi;
 
 
-export PATH="$PATH:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Applications/Server.app/Contents/ServerRoot/usr/bin:/Applications/Server.app/Contents/ServerRoot/usr/sbin:/usr/local/git/bin:/usr/local/MacGPG2/bin:/usr/local/eb/linux/python2.7/:/usr/local/share/npm/bin:$HOME/.rvm/bin:/usr/local/share/npm/bin"
+export PATH="$PATH:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Applications/Server.app/Contents/ServerRoot/usr/bin:/Applications/Server.app/Contents/ServerRoot/usr/sbin:/usr/local/git/bin:/usr/local/MacGPG2/bin:/usr/local/eb/linux/python2.7/:/usr/local/share/npm/bin:/usr/local/share/npm/bin"
 
 export PATH="$PATH:./node_modules/.bin"
 export PATH="$PATH:$HOME/go/bin"
@@ -133,5 +133,5 @@ then;
 fi;
 
 # Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
-export PATH="$PATH:$HOME/.rvm/bin"
+export PATH="$HOME/.rvm/bin:$PATH"
 
