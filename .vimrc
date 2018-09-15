@@ -1,4 +1,5 @@
 set runtimepath+=~/.vim_runtime
+set clipboard=unnamed
 
 source ~/.vim_runtime/vimrcs/basic.vim
 source ~/.vim_runtime/vimrcs/filetypes.vim

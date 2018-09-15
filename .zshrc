@@ -104,8 +104,6 @@ alias tmux="TERM=screen-256color-bce tmux"
 alias mux="tmuxinator"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-
-# Added by MiregoGradle
 autoload -U add-zsh-hook
 load-nvmrc() {
   local node_version="$(nvm version)"
