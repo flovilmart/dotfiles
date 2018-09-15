@@ -1,5 +1,5 @@
 .PHONY: all
-all: dotfiles fonts ## Installs the bin and etc directory files and the dotfiles.
+all: dotfiles fonts vim ## Installs the bin and etc directory files and the dotfiles.
 
 #.PHONY: bin
 #bin: ## Installs the bin directory files.
@@ -21,6 +21,11 @@ dotfiles: ## Installs the dotfiles.
 fonts:
 	cp -R $(CURDIR)/fonts/* $(HOME)/Library/fonts/; 
 
+.PHONY: vim
+vim:
+	ln -sfn $(CURDIR)/vimrc $(HOME)/.vim_runtime
+	sh $(HOME)/.vim_runtime/install_awesome_vimrc.sh
+	
 
 #.PHONY: test
 #test: shellcheck ## Runs all the tests on the files in the repository.
