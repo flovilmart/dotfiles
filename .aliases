@@ -9,3 +9,6 @@ code () {
 	fi
 }
 
+alias mdev="mux dev"
+alias tsw="tmux switch -t"
+
