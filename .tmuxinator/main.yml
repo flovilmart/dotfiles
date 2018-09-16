@@ -1,14 +1,13 @@
 # ~/.tmuxinator/default.yml
 
-name: default
+name: main
 root: ~/src
 windows:
-  - default:
+  - 0:
       root: ~/src
       layout: 745e,238x73,0,0[238x46,0,0,18,238x26,0,47{79x26,0,47,22,79x26,80,47,23,78x26,160,47,24}]
-      panes: 
+      panes:
         - #
         - #
         - #
         - #
-      
