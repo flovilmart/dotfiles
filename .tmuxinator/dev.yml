@@ -1,5 +1,5 @@
 # ~/.tmuxinator/dev.yml
-
+<% unless File.directory?(@args[0]); raise "Cannot open #{args[0]}" end %>
 name: dev/<%= @args[0].split("/").last %>
 root: <%= @args[0] %>
 
