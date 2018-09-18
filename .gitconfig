@@ -6,7 +6,7 @@
 	excludesfile = ~/.gitignore_global
 [push]
 	default = current
-	recurseSubmodules = on-demand
+	recurseSubmodules = check
 [http]
 	postBuffer = 52428800
 [credential]
@@ -15,6 +15,10 @@
 	rebase = true
 [rebase]
 	autosquash = true
+[status]
+	submodulesummary = 1
+[diff]
+	submodule = log
 
 # [filter "media"]
 # 	required = true
