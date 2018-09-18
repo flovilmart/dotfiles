@@ -6,6 +6,7 @@
 	excludesfile = ~/.gitignore_global
 [push]
 	default = current
+	recurseSubmodules = on-demand
 [http]
 	postBuffer = 52428800
 [credential]
