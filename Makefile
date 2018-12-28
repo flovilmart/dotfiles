@@ -21,15 +21,19 @@ dotfiles: ## Installs the dotfiles.
 fonts:
 	cp -R $(CURDIR)/fonts/* $(HOME)/Library/fonts/; 
 
-.PHONY: vim
-vim:
+.PHONY: submodules
+submodules:
 	git submodule update --init --recursive
+
+.PHONY: vim
+vim: submodules
 	ln -sfn $(CURDIR)/vimrc $(HOME)/.vim_runtime
 	sh $(HOME)/.vim_runtime/install_awesome_vimrc.sh
 
 .PHONY: tmux_plugins
-tmux_plugins:
-	git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+tmux_plugins: submodules
+	mkdir -p $(HOME)/.tmux/plugins
+	ln -sfn $(CURDIR)/tpm $(HOME)/.tmux/plugins/tpm
 	
 
 #.PHONY: test

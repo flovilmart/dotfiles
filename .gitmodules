@@ -1,3 +1,6 @@
 [submodule "vimrc"]
 	path = vimrc
 	url = https://github.com/flovilmart/vimrc.git
+[submodule "tpm"]
+	path = tpm
+	url = https://github.com/tmux-plugins/tpm
