@@ -1,5 +1,5 @@
 .PHONY: all
-all: dotfiles fonts vim ## Installs the bin and etc directory files and the dotfiles.
+all: dotfiles fonts vim tmux_plugins ## Installs the bin and etc directory files and the dotfiles.
 
 #.PHONY: bin
 #bin: ## Installs the bin directory files.
@@ -26,6 +26,10 @@ vim:
 	git submodule update --init --recursive
 	ln -sfn $(CURDIR)/vimrc $(HOME)/.vim_runtime
 	sh $(HOME)/.vim_runtime/install_awesome_vimrc.sh
+
+.PHONY: tmux_plugins
+tmux_plugins:
+	git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 	
 
 #.PHONY: test
