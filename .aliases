@@ -11,4 +11,5 @@ code () {
 
 alias mdev="mux dev"
 alias tsw="tmux switch -t"
+alias flush_dns="sudo killall -HUP mDNSResponder; sleep 2;"
 
