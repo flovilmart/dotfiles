@@ -12,4 +12,5 @@ code () {
 alias mdev="mux dev"
 alias tsw="tmux switch -t"
 alias flush_dns="sudo killall -HUP mDNSResponder; sleep 2;"
+alias set_pane_title="printf '\033]2;%s\033\\'"
 

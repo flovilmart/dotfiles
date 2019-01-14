@@ -267,7 +267,7 @@ build_prompt() {
   prompt_virtualenv
   prompt_context
   prompt_dir
-  [[ "${kube_prompt}" -ne "1" ]] && prompt_git
+  prompt_git
   [[ "${kube_prompt}" -eq "1" ]] && prompt_kube
   prompt_bzr
   prompt_hg
