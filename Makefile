@@ -33,7 +33,7 @@ vim: submodules
 .PHONY: tmux_plugins
 tmux_plugins: submodules
 	mkdir -p $(HOME)/.tmux/plugins
-	ln -sfn $(CURDIR)/tpm $(HOME)/.tmux/plugins/tpm
+	ln -sfn $(CURDIR)/tpm $(HOME)/.tmux/plugins
 	
 
 #.PHONY: test
