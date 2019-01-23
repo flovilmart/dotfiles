@@ -26,7 +26,7 @@ submodules:
 	git submodule update --init --recursive
 
 .PHONY: vim
-vim: submodules
+vim: vim_brew submodules
 	ln -sfn $(CURDIR)/vimrc $(HOME)/.vim_runtime
 	sh $(HOME)/.vim_runtime/install_awesome_vimrc.sh
 
@@ -34,8 +34,11 @@ vim: submodules
 tmux_plugins: submodules
 	mkdir -p $(HOME)/.tmux/plugins
 	ln -sfn $(CURDIR)/tpm $(HOME)/.tmux/plugins
-	
 
+.PHONY: vim_brew
+vim_brew:
+	brew install ag ack fzf || exit 0
+	
 #.PHONY: test
 #test: shellcheck ## Runs all the tests on the files in the repository.
 #
