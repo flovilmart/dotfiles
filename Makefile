@@ -11,11 +11,11 @@ all: dotfiles fonts vim tmux_plugins ## Installs the bin and etc directory files
 .PHONY: dotfiles/
 dotfiles: ## Installs the dotfiles.
 	# add aliases for dotfiles
-	for file in $(shell find $(CURDIR) -name ".*" -not -name ".gitignore" -not -name ".travis.yml" -not -name ".git" -not -name ".*.swp" -not -name ".gnupg"); do \
+	for file in $(shell find $(CURDIR) -maxdepth 1 -type f -name ".*" -not -name ".gitignore" -not -name ".travis.yml" -not -name ".git" -not -name ".*.swp" -not -name ".gnupg"); do \
 		f=$$(basename $$file); \
 		ln -sfn $$file $(HOME)/$$f; \
 	done; \
-	ln -sfn $(CURDIR)/.oh-my-zsh/themes/flo.zsh-theme $(HOME)/.oh-my-zsh/themes/flo.zsh-theme; \
+	ln -sfn $(CURDIR)/.oh-my-zsh/themes/flo.zsh-theme $(HOME)/.oh-my-zsh/themes/flo.zsh-theme;
 
 .PHONY: fonts
 fonts:
