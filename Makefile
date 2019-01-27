@@ -38,6 +38,10 @@ tmux_plugins: submodules
 .PHONY: vim_brew
 vim_brew:
 	brew install ag ack fzf || exit 0
+
+.PHONY: prezto
+prezto:
+	ln -sfn $(CURDIR)/.zprezto $(HOME)
 	
 #.PHONY: test
 #test: shellcheck ## Runs all the tests on the files in the repository.
