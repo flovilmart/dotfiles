@@ -4,3 +4,6 @@
 [submodule "tpm"]
 	path = tpm
 	url = https://github.com/tmux-plugins/tpm
+[submodule "prezto"]
+	path = .zprezto 
+	url = https://github.com/flovilmart/prezto
