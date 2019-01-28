@@ -10,6 +10,17 @@ zstyle ':prezto:load' pmodule \
   'prompt' \
   'syntax-highlighting' \
   'history-substring-search' \
+  'history' \
 
+# prompt options
 zstyle ':prezto:module:prompt' theme 'zimple'
+
+# history substring
+zstyle ':prezto:module:history-substring-search' color 'yes'
+zstyle ':prezto:module:history-substring-search:color' found 'bg=none,fg=yellow'
+
+bindkey '^[[A' history-substring-search-up
+bindkey '^[[B' history-substring-search-down
+bindkey -M vicmd 'k' history-substring-search-up
+bindkey -M vicmd 'j' history-substring-search-down
 
