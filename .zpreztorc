@@ -1,7 +1,5 @@
 # Set the Prezto modules to load (browse modules).
 # The order matters.
-DEFAULT_USER=florent
-
 zstyle ':prezto:load' pmodule \
   'directory' \
   'utility' \
