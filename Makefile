@@ -1,5 +1,5 @@
 .PHONY: all
-all: dotfiles fonts vim tmux_plugins prezto ## Installs the bin and etc directory files and the dotfiles.
+all: dotfiles fonts vim tmux_plugins prezto n## Installs the bin and etc directory files and the dotfiles.
 
 #.PHONY: bin
 #bin: ## Installs the bin directory files.
@@ -42,6 +42,9 @@ vim_brew:
 prezto:
 	ln -sfn $(CURDIR)/.zprezto $(HOME)
 	
+.PHONY: n
+n:
+	curl -L https://git.io/n-install | bash
 #.PHONY: test
 #test: shellcheck ## Runs all the tests on the files in the repository.
 #

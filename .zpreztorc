@@ -9,6 +9,7 @@ zstyle ':prezto:load' pmodule \
   'syntax-highlighting' \
   'history-substring-search' \
   'history' \
+  'n' \
 
 # prompt options
 zstyle ':prezto:module:prompt' theme 'zimple'
