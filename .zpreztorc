@@ -4,6 +4,7 @@ zstyle ':prezto:load' pmodule \
   'directory' \
   'utility' \
   'completion' \
+  'k8s' \
   'git' \
   'prompt' \
   'syntax-highlighting' \
