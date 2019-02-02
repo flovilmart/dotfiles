@@ -44,7 +44,18 @@ prezto:
 	
 .PHONY: n
 n:
-	curl -L https://git.io/n-install | bash
+	which node && exit 0 || curl -sL https://git.io/n-install | bash
+.PHONY: lang-server
+lang-server:
+	npm install -g typescript;
+	ROOT=$(shell npm root -g); \
+	rm -rf $$ROOT/javascript-typescript-langserver;		 \
+	DIR=$(shell mktemp -d); \
+	curl -sL https://github.com/sourcegraph/javascript-typescript-langserver/archive/master.zip -o $$DIR/archive.zip; \
+	cd $$DIR; \
+	unzip archive.zip; \
+	cd javascript-typescript-langserver-master; npm install; npm run build && npm install -g .;
+
 #.PHONY: test
 #test: shellcheck ## Runs all the tests on the files in the repository.
 #
