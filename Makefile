@@ -1,16 +1,8 @@
 .PHONY: all
-all: dotfiles fonts vim tmux_plugins prezto n## Installs the bin and etc directory files and the dotfiles.
+all: dotfiles fonts vim tmux_plugins prezto n lang-server
 
-#.PHONY: bin
-#bin: ## Installs the bin directory files.
-#	# add aliases for things in bin
-#	for file in $(shell find $(CURDIR)/bin -type f -not -name "*-backlight" -not -name ".*.swp"); do \
-#		f=$$(basename $$file); \
-#		sudo ln -sf $$file /usr/local/bin/$$f; \
-#	done
 .PHONY: dotfiles/
-dotfiles: ## Installs the dotfiles.
-	# add aliases for dotfiles
+dotfiles:
 	for file in $(shell find $(CURDIR) -maxdepth 1 -type f -name ".*" -not -name ".gitignore" -not -name ".travis.yml" -not -name ".git" -not -name ".*.swp" -not -name ".gnupg"); do \
 		f=$$(basename $$file); \
 		ln -sfn $$file $(HOME)/$$f; \
