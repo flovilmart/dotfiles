@@ -1,6 +1,7 @@
 # Source Prezto.
 unsetopt CORRECT
 
+source ~/.aliases
 source ~/.extra
 
 if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh"  ]]; then
