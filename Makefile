@@ -1,5 +1,5 @@
 .PHONY: all
-all: dotfiles fonts vim tmux_plugins prezto n lang-server
+all: brew tmux dotfiles fonts vim tmux_plugins prezto nvm lang-server
 
 .PHONY: dotfiles/
 dotfiles:
@@ -16,6 +16,13 @@ fonts:
 submodules:
 	git submodule update --init --recursive
 
+brew:
+	/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+
+
+tmux: brew
+	brew install tmux hub || brew upgrade tmux hub
+
 .PHONY: vim
 vim: vim_brew submodules
 	ln -sfn $(CURDIR)/vimrc $(HOME)/.vim_runtime
@@ -28,15 +35,16 @@ tmux_plugins: submodules
 
 .PHONY: vim_brew
 vim_brew:
-	brew install ag ack fzf || exit 0
+	brew install ag ack fzf  || brew upgrade ag ack fzf || exit 0
 
 .PHONY: prezto
 prezto:
 	ln -sfn $(CURDIR)/.zprezto $(HOME)
 	
-.PHONY: n
-n:
-	which node && exit 0 || curl -sL https://git.io/n-install | bash
+.PHONY: nvm
+nvm:
+	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.1/install.sh | bash
+
 .PHONY: lang-server
 lang-server:
 	npm install -g typescript;
@@ -48,25 +56,6 @@ lang-server:
 	unzip archive.zip; \
 	cd javascript-typescript-langserver-master; npm install; npm run build && npm install -g .;
 
-#.PHONY: test
-#test: shellcheck ## Runs all the tests on the files in the repository.
-#
-## if this session isn't interactive, then we don't want to allocate a
-## TTY, which would fail, but if it is interactive, we do want to attach
-## so that the user can send e.g. ^C through.
-#INTERACTIVE := $(shell [ -t 0 ] && echo 1 || echo 0)
-#ifeq ($(INTERACTIVE), 1)
-#	DOCKER_FLAGS += -t
-#endif
-#
-#.PHONY: shellcheck
-#shellcheck: ## Runs the shellcheck tests on the scripts.
-#	docker run --rm -i $(DOCKER_FLAGS) \
-#		--name df-shellcheck \
-#		-v $(CURDIR):/usr/src:ro \
-#		--workdir /usr/src \
-#		r.j3ss.co/shellcheck ./test.sh
-#
 .PHONY: help
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
