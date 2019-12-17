@@ -3,15 +3,16 @@
 zstyle ':prezto:load' pmodule \
   'directory' \
   'utility' \
-  'autosuggestions' \
   'completion' \
   'k8s' \
   'git' \
   'prompt' \
+  'fasd' \
   'syntax-highlighting' \
   'history-substring-search' \
   'history' \
-  'n' \
+  'autosuggestions' \
+  'node' \
 
 # prompt options
 zstyle ':prezto:module:prompt' theme 'zimple'
