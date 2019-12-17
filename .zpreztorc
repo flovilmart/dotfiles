@@ -3,6 +3,7 @@
 zstyle ':prezto:load' pmodule \
   'directory' \
   'utility' \
+  'autosuggestions' \
   'completion' \
   'k8s' \
   'git' \
