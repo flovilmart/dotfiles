@@ -8,6 +8,11 @@ source $HOME/.aliases
 # Optionally, if you set this to "random", it'll load a random theme each
 # time that oh-my-zsh is loaded.
 ZSH_THEME="flo"
+
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "/usr/local/opt/nvm/nvm.sh" ] && . "/usr/local/opt/nvm/nvm.sh"  # This loads nvm
+[ -s "/usr/local/opt/nvm/etc/bash_completion" ] && . "/usr/local/opt/nvm/etc/bash_completion"
  
 # ZSH_TMUX_AUTOSTART="true"
 
@@ -56,7 +61,7 @@ ZSH_THEME="flo"
 # plugins=(git nvm jsontools vscode  tmux tmuxinator kubectl)
 plugins=(git nvm tmux vscode kubectl)
 
-export JIRA_URL=https://amp-me.atlassian.net/projects/AMPME 
+export JIRA_URL=https://shutterstock-jira.codefactori.com/projects/PBA
 JIRA_RAPID_BOARD="true"
 
 # User configuration
