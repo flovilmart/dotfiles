@@ -1,0 +1,88 @@
+project: AMPME
+endpoint: https://amp-me.atlassian.net
+custom-commands:
+  - name: mine
+    help: display issues assigned to me
+    script: |-
+      {{jira}} list --query "assignee = currentUser() and resolution = Unresolved and status != Done order by updated"
+  - name: estimate
+    help: estimate an issue
+    args:
+      - name: ISSUE
+        type: STRING
+        required: true
+    script: |-
+      {{jira}} edit -t editestimate {{args.ISSUE}}
+  - name: sprint
+    help: display issues for active sprint
+    args:
+      - name: COMPONENTS
+        type: STRING
+    script: |-
+      CMP_CLAUSE=""
+      if [[ "{{args.COMPONENTS}}" != "<no value>" ]]; then
+        CMP_CLAUSE="AND Component={{args.COMPONENTS}} "
+      fi
+      {{jira}} list --query "sprint in openSprints() ${CMP_CLAUSE} AND type != epic AND resolution = unresolved and status != Done and project=$JIRA_PROJECT ORDER BY rank asc, created"
+  - name: bugs
+    help: display issues for active sprint
+    args:
+      - name: COMPONENTS
+        type: STRING
+    script: |-
+      CMP_CLAUSE=""
+      if [[ "{{args.COMPONENTS}}" != "<no value>" ]]; then
+        CMP_CLAUSE="AND Component={{args.COMPONENTS}} "
+      fi
+      {{jira}} list -q "Sprint in openSprints() AND  (type = anomaly OR type = bug) ${CMP_CLAUSE} AND project=$JIRA_PROJECT AND statusCategory ='To Do'"
+  - name: groom
+    help: helper to groom jira sprint
+    args:
+      - name: COMPONENTS
+        type: STRING
+        default: 
+    script: |-
+      CMP_CLAUSE=""
+      if [[ "{{args.COMPONENTS}}" != "<no value>" ]]; then
+        CMP_CLAUSE="AND Component={{args.COMPONENTS}} "
+      fi
+      {{jira}} list -t grooming -q "Sprint not in openSprints() ${CMP_CLAUSE} AND labels in (TBEstimate, TBSpec)"
+  - name: grooming
+    help: helper to groom jira sprint
+    args:
+      - name: COMPONENTS
+        type: STRING
+        default: 
+    script: |-
+      CMP_CLAUSE=""
+      if [[ "{{args.COMPONENTS}}" != "<no value>" ]]; then
+        CMP_CLAUSE="AND Component={{args.COMPONENTS}} "
+      fi
+      issues=$({{jira}} list -t keys -q "Sprint not in openSprints() ${CMP_CLAUSE} AND labels in (TBEstimate)")
+      for issue in $issues; do
+        {{jira}} view $issue
+        echo " Press Enter to continue > "
+        read CMD;
+        echo "..."
+      done
+  - name: android
+    help: create subtask for android
+    args: 
+      - name: ISSUE
+        type: String
+    script: |-
+      {{ jira }} subtask -t subtask_android {{args.ISSUE}}
+  - name: ios
+    help: create subtask for ios
+    args: 
+      - name: ISSUE
+        type: String
+    script: |-
+      {{ jira }} subtask -t subtask_ios {{args.ISSUE}}
+  - name: progress
+    help: move to In Progress
+    args:
+      - name: ISSUE_CODE
+        type: String
+    script: |-
+      {{ jira }} transition "In Progress" {{args.ISSUE_CODE}}

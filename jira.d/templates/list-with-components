@@ -1,0 +1,4 @@
+{{ range .issues }}{{ .key | append ":" | printf "%-12s"}}[{{ .components }}] {{ .fields.summary }}
+
+
+{{ end }}
