@@ -1,5 +1,7 @@
-project: AMPME
-endpoint: https://amp-me.atlassian.net
+#!/bin/sh
+
+cat ./.config.yml
+cat <<EOF
 custom-commands:
   - name: mine
     help: display issues assigned to me
@@ -86,3 +88,5 @@ custom-commands:
         type: String
     script: |-
       {{ jira }} transition "In Progress" {{args.ISSUE_CODE}}
+EOF
+

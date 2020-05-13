@@ -1,5 +1,5 @@
 .PHONY: all
-all: brew tmux dotfiles fonts vim tmux_plugins prezto nvm lang-server
+all: brew tmux dotfiles fonts vim tmux_plugins prezto jira nvm lang-server
 
 .PHONY: dotfiles/
 dotfiles:
@@ -39,7 +39,11 @@ vim_brew:
 .PHONY: prezto
 prezto:
 	ln -sfn $(CURDIR)/.zprezto $(HOME)
-	
+
+.PHONY: jira
+jira:
+	ln -sfn $(CURDIR)/.jira.d $(HOME)
+
 .PHONY: nvm
 nvm:
 	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.1/install.sh | bash
