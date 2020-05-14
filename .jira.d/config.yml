@@ -1,5 +1,5 @@
 #!/bin/bash
-cat ./.config.yml
+cat ./auth.yml
 
 cat <<EOF
 custom-commands:
