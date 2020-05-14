@@ -1,4 +1,6 @@
 #!/bin/bash
+
+DONE_STATUS=Closed
 cat ./auth.yml
 
 cat <<EOF
@@ -6,7 +8,7 @@ custom-commands:
   - name: mine
     help: display issues assigned to me
     script: |-
-      jira list --query "assignee = currentUser() and resolution = Unresolved and status != Done order by updated"
+      jira list --query "assignee = currentUser() and resolution = Unresolved and status != $DONE_STATUS order by updated"
   - name: estimate
     help: estimate an issue
     args:
@@ -25,7 +27,7 @@ custom-commands:
       if [[ "{{args.COMPONENTS}}" != "<no value>" ]]; then
         CMP_CLAUSE="AND Component={{args.COMPONENTS}}"
       fi
-      jira list --query "sprint in openSprints() \${CMP_CLAUSE} AND type != epic AND resolution = unresolved and status != Closed and project=\$JIRA_PROJECT ORDER BY rank asc, created"
+      jira list --query "sprint in openSprints() \${CMP_CLAUSE} AND type != epic AND resolution = unresolved and status != $DONE_STATUS and project=\$JIRA_PROJECT ORDER BY rank asc, created"
   - name: bugs
     help: display issues for active sprint
     args:
