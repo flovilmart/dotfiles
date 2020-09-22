@@ -1,5 +1,5 @@
 .PHONY: all
-all: brew tmux dotfiles fonts vim tmux_plugins prezto jira nvm lang-server
+all: brew dotfiles fonts vim tmux_plugins prezto jira nvm lang-server
 
 .PHONY: dotfiles/
 dotfiles:
@@ -18,9 +18,7 @@ submodules:
 
 brew:
 	/usr/bin/ruby -e `curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install`
-
-tmux: brew
-	brew install tmux hub || brew upgrade tmux hub
+	brew bundle
 
 .PHONY: vim
 vim: vim_brew submodules
