@@ -2,7 +2,7 @@
 # issue: {{ .key }} - created: {{ .fields.created | age}} ago
 update:
   comment:
-    - add: 
+    - add:
         body: |~
           {{ or .overrides.comment "" | indent 10 }}
 fields:
@@ -12,17 +12,16 @@ fields:
   components: # Values: {{ range .meta.fields.components.allowedValues }}{{.name}}, {{end}}{{if .overrides.components }}{{ range (split "," .overrides.components)}}
     - name: {{.}}{{end}}{{else}}{{ range .fields.components }}
     - name: {{ .name }}{{end}}{{end}}{{end}}
+{{- if and .meta.fields.labels .meta.fields.labels.allowedValues }}
+  labels: # Values: {{ range .meta.fields.labels.allowedValues }}{{.name}}, {{end}}{{if .overrides.labels }}{{ range (split "," .overrides.labels)}}
+    - name: {{.}}{{end}}{{else}}{{ range .fields.labels }}
+    - name: {{ .name }}{{end}}{{end}}{{end}}
 {{- if .meta.fields.assignee}}
   assignee:
     name: {{ if .overrides.assignee }}{{.overrides.assignee}}{{else}}{{if .fields.assignee }}{{ .fields.assignee.name }}{{end}}{{end}}{{end}}
 {{- if .meta.fields.reporter}}
   reporter:
     name: {{ if .overrides.reporter }}{{ .overrides.reporter }}{{else if .fields.reporter}}{{ .fields.reporter.name }}{{end}}{{end}}
-{{- if .meta.fields.customfield_10110}}
-  # watchers
-  customfield_10110: {{ range .fields.customfield_10110 }}
-    - name: {{ .name }}{{end}}{{if .overrides.watcher}}
-    - name: {{ .overrides.watcher}}{{end}}{{end}}
 {{- if .meta.fields.priority }}
   priority: # Values: {{ range .meta.fields.priority.allowedValues }}{{.name}}, {{end}}
     name: {{ or .overrides.priority .fields.priority.name "" }}{{end}}
@@ -30,10 +29,10 @@ fields:
     {{ or .overrides.description .fields.description "" | indent 4 }}
   timetracking:
     originalEstimate: {{ if .fields.timetracking.originalEstimate }}{{ .fields.timetracking.originalEstimate }}{{end}}
-  # Sprint 
-  customfield_10019: {{ range .fields.customfield_10019 }}{{end}}
+  # Sprint
+  customfield_10320: {{ range .fields.customfield_10320 }}{{end}}
 # votes: {{ .fields.votes.votes }}
-# comments:
+# comments:customfield_10320
 # {{ range .fields.comment.comments }}  - | # {{.author.name}}, {{.created | age}} ago
 #     {{ or .body "" | indent 4 | comment}}
 # {{end}}
