@@ -35,6 +35,7 @@ brew "postgresql"
 brew "python@3.8"
 brew "redis"
 brew "telnet"
+brew "tmux"
 brew "terraform", link: false
 brew "tfenv"
 brew "the_silver_searcher"

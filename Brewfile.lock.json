@@ -11,7 +11,7 @@
         "revision": "b84d4569eafe799c7c46c6c12c63215cb8095b6d"
       },
       "homebrew/cask": {
-        "revision": "cef5b4312d03f405041b39bb81a1b95161d43212"
+        "revision": "7de45d1ff2bbfbc7f2e71328061ec4fc077e1271"
       },
       "homebrew/core": {
         "revision": "e7e4870129a6d87b9c879305fc9c45b87b3859ea"
@@ -693,7 +693,28 @@
         }
       },
       "int128/kubelogin/kubelogin": null,
-      "stripe/stripe-cli/stripe": null
+      "stripe/stripe-cli/stripe": null,
+      "tmux": {
+        "version": "3.1b",
+        "bottle": {
+          "cellar": ":any",
+          "prefix": "/usr/local",
+          "files": {
+            "catalina": {
+              "url": "https://homebrew.bintray.com/bottles/tmux-3.1b.catalina.bottle.1.tar.gz",
+              "sha256": "785c1b2e2518478621eb5ac894b3f0ed06d8fdc4d223dd476451ab26974e3803"
+            },
+            "mojave": {
+              "url": "https://homebrew.bintray.com/bottles/tmux-3.1b.mojave.bottle.1.tar.gz",
+              "sha256": "a8fb2df02c2e094404b6c56e2b9d15a35abd012913771ad311e08cc3572f0e4b"
+            },
+            "high_sierra": {
+              "url": "https://homebrew.bintray.com/bottles/tmux-3.1b.high_sierra.bottle.1.tar.gz",
+              "sha256": "5d43e03fc71740ec38c98b309adb2b6d198a20fcb14f76bc163232fda61fac23"
+            }
+          }
+        }
+      }
     }
   },
   "system": {
