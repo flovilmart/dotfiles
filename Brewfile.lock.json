@@ -24,6 +24,9 @@
       },
       "stripe/stripe-cli": {
         "revision": "bab4dd87ac39c97e373997c08b3efebc6d744a3d"
+      },
+      "homebrew/cask-fonts": {
+        "revision": "c07c9dfcbfe5e43b83600d7f91d76095af345aa9"
       }
     },
     "cask": {
@@ -37,6 +40,18 @@
         "version": "0.12.6-2",
         "options": {
           "full_name": "wkhtmltopdf"
+        }
+      },
+      "font-fira-mono-nerd-font": {
+        "version": "2.1.0",
+        "options": {
+          "full_name": "font-fira-mono-nerd-font"
+        }
+      },
+      "font-fira-code-nerd-font": {
+        "version": "2.1.0",
+        "options": {
+          "full_name": "font-fira-code-nerd-font"
         }
       }
     },

@@ -8,10 +8,6 @@ dotfiles:
 		ln -sfn $$file $(HOME)/$$f; \
 	done; \
 
-.PHONY: fonts
-fonts:
-	cp -R $(CURDIR)/fonts/* $(HOME)/Library/fonts/; 
-
 .PHONY: submodules
 submodules:
 	git submodule update --init --recursive
