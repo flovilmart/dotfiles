@@ -1,5 +1,5 @@
 .PHONY: all
-all: brew brew_bundle dotfiles fonts vim tmux_plugins prezto jira nvm lang-server
+all: brew brew_bundle dotfiles fonts vim tmux_plugins prezto nvm lang-server
 
 .PHONY: dotfiles/
 dotfiles:
@@ -24,7 +24,7 @@ brew_bundle:
 .PHONY: vim
 vim: submodules
 	ln -sfn $(CURDIR)/vimrc $(HOME)/.vim_runtime
-	sh $(HOME)/.vim_runtime/install_awesome_vimrc.sh
+	sh $(HOME)/.vim_runtime/install.sh
 
 .PHONY: tmux_plugins
 tmux_plugins: submodules
