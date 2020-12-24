@@ -1,2 +1,5 @@
 .DS_Store
 
+cookies.js
+.jira.d/.config.yml
+.jira.d/auth.yml

@@ -1,5 +1,5 @@
 .PHONY: all
-all: brew tmux dotfiles fonts vim tmux_plugins prezto nvm lang-server
+all: brew brew_bundle dotfiles fonts vim tmux_plugins prezto jira nvm lang-server
 
 .PHONY: dotfiles/
 dotfiles:
@@ -17,13 +17,12 @@ submodules:
 	git submodule update --init --recursive
 
 brew:
-	/usr/bin/ruby -e `curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install`
-
-tmux: brew
-	brew install tmux hub || brew upgrade tmux hub
+	which brew || curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh | bash
+brew_bundle:
+	brew bundle
 
 .PHONY: vim
-vim: vim_brew submodules
+vim: submodules
 	ln -sfn $(CURDIR)/vimrc $(HOME)/.vim_runtime
 	sh $(HOME)/.vim_runtime/install_awesome_vimrc.sh
 
@@ -32,17 +31,18 @@ tmux_plugins: submodules
 	mkdir -p $(HOME)/.tmux/plugins
 	ln -sfn $(CURDIR)/tpm $(HOME)/.tmux/plugins
 
-.PHONY: vim_brew
-vim_brew:
-	brew install ag ack fzf  || brew upgrade ag ack fzf || exit 0
-
 .PHONY: prezto
 prezto:
 	ln -sfn $(CURDIR)/.zprezto $(HOME)
-	
+
+.PHONY: jira
+jira:
+	ln -sfn $(CURDIR)/.jira.d $(HOME)
+
 .PHONY: nvm
 nvm:
-	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.1/install.sh | bash
+	curl -so- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.1/install.sh | bash
+	source $(NVM_DIR)/nvm.sh && nvm install 12
 
 .PHONY: lang-server
 lang-server:
