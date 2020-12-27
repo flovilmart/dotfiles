@@ -12,7 +12,8 @@ zstyle ':prezto:load' pmodule \
   'history-substring-search' \
   'history' \
   'autosuggestions' \
-  'node' \
+  'rails' \
+  'ruby' \
 
 # prompt options
 zstyle ':prezto:module:prompt' theme 'zimple'

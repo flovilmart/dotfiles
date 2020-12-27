@@ -1,10 +1,11 @@
 .PHONY: all
-all: brew brew_bundle dotfiles fonts vim tmux_plugins prezto nvm lang-server
+all: brew brew_bundle node ruby dotfiles vim tmux_plugins prezto
 
 .PHONY: dotfiles/
 dotfiles:
 	for file in $(shell find $(CURDIR) -maxdepth 1 -type f -name ".*" -not -name ".gitignore" -not -name ".travis.yml" -not -name ".git" -not -name ".*.swp" -not -name ".gnupg"); do \
 		f=$$(basename $$file); \
+		echo $$file; \
 		ln -sfn $$file $(HOME)/$$f; \
 	done; \
 
@@ -16,6 +17,22 @@ brew:
 	which brew || curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh | bash
 brew_bundle:
 	brew bundle
+	brew bundle --file=Brewfile.cloud
+
+brew_bundle_lang: brew
+	brew bundle --file=Brewfile.lang
+
+brew_bundle_ruby: brew
+	brew bundle --file=Brewfile.ruby
+
+ruby: brew_bundle_ruby
+	rbenv install -s 2.6.5
+	rbenv global 2.6.5
+	gem install rails --version=6.0.1 --no-document
+
+node: brew_bundle_lang
+	N_PREFIX=$(HOME)/n n lts
+	N_PREFIX=$(HOME)/n npm install -g typescript eslint prettier;
 
 .PHONY: vim
 vim: submodules
@@ -34,22 +51,6 @@ prezto:
 .PHONY: jira
 jira:
 	ln -sfn $(CURDIR)/.jira.d $(HOME)
-
-.PHONY: nvm
-nvm:
-	curl -so- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.1/install.sh | bash
-	source $(NVM_DIR)/nvm.sh && nvm install 12
-
-.PHONY: lang-server
-lang-server:
-	npm install -g typescript;
-	ROOT=$(shell npm root -g); \
-	rm -rf $$ROOT/javascript-typescript-langserver;		 \
-	DIR=$(shell mktemp -d); \
-	curl -sL https://github.com/sourcegraph/javascript-typescript-langserver/archive/master.zip -o $$DIR/archive.zip; \
-	cd $$DIR; \
-	unzip archive.zip; \
-	cd javascript-typescript-langserver-master; npm install; npm run build && npm install -g .;
 
 .PHONY: help
 help:
