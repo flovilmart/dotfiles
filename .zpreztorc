@@ -14,6 +14,7 @@ zstyle ':prezto:load' pmodule \
   'autosuggestions' \
   'rails' \
   'ruby' \
+  'n' \
 
 # prompt options
 zstyle ':prezto:module:prompt' theme 'zimple'
