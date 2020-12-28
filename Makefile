@@ -36,8 +36,8 @@ node: brew_bundle_lang
 
 .PHONY: vim
 vim: submodules
-	ln -sfn $(CURDIR)/vimrc $(HOME)/.vim_runtime
-	sh $(HOME)/.vim_runtime/install.sh
+	ln -sfn $(CURDIR)/vimrc $(HOME)/.vim
+	sh $(HOME)/.vim/install.sh
 
 .PHONY: tmux_plugins
 tmux_plugins: submodules
