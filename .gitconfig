@@ -42,3 +42,6 @@
 	co = checkout
 	st = status
   main = !git co main && git pull origin main
+	pr-web = !gh pr view -w
+	pr = !gh pr
+	pr-view = !gh pr view -w
