@@ -21,9 +21,6 @@
 [diff]
 	submodule = log
 
-[hub]
-	host = github.shuttercorp.net
-
 # [filter "media"]
 # 	required = true
 # 	clean = git media clean %f
@@ -45,3 +42,4 @@
 	pr-web = !gh pr view -w
 	pr = !gh pr
 	pr-view = !gh pr view -w
+  hub = !gh
