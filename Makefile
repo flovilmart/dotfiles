@@ -1,3 +1,4 @@
+
 .PHONY: all
 all: brew brew_bundle node ruby dotfiles vim tmux_plugins prezto
 
@@ -55,4 +56,15 @@ jira:
 .PHONY: help
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+
+.PHONY: alanuship
+alanuship:
+	# brew install alacritty nushell starship
+	mkdir -p $(HOME)/.config/alacritty
+	ln -sfn $(CURDIR)/starship.toml $(HOME)/.config/starship.toml
+	ln -sfn $(CURDIR)/starship-short.toml $(HOME)/.config/starship-short.toml
+	ln -sfn $(CURDIR)/alacritty.yaml $(HOME)/.config/alacritty/
+	ln -sfn $(CURDIR)/.init.nu $(HOME)/.config/.init.nu
+	-cp -n $(CURDIR)/nushell.config.toml "$(shell nu -c "config path")"
+	nu -c "blastoff"
 

@@ -1,0 +1,6 @@
+add_newline=false
+format="${custom.date}$character"
+
+[custom.date]
+command = "date now"
+format = "$output"

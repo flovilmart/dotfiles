@@ -1,0 +1,6 @@
+add_newline=false
+
+[cmd_duration]
+disabled=true
+min_time = 0
+format = "underwent [$duration](bold yellow)"
