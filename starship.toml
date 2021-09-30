@@ -1,6 +1,38 @@
-add_newline=false
+add_newline = false
+
+format = '$directory\($git_branch$git_status\) $kubernetes$line_break$time$character'
 
 [cmd_duration]
-disabled=true
+disabled = true
 min_time = 0
 format = "underwent [$duration](bold yellow)"
+
+[kubernetes]
+disabled = false
+style = "blue"
+format = '(\[$symbol[$context:$namespace]($style)\])'
+
+[git_status]
+modified = "±"
+stashed = ""
+style = "red"
+format = '([\[$all_status$ahead_behind\]]($style))'
+
+[git_branch]
+symbol = ""
+style = "green"
+format = "[$branch]($style)"
+
+[directory]
+truncation_length = 8
+truncate_to_repo = false
+style = "blue"
+
+[time]
+disabled = false
+time_format="%R"
+style = "white"
+format = "[$time]($style) "
+
+[character]
+success_symbol = '[\$](red)'

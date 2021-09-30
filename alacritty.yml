@@ -157,8 +157,8 @@ debug:
 colors:
   # Default colors
   primary:
-    background: '0x212121'
-    foreground: '0x718384'
+    background: '#212121'
+    foreground: '#718384'
 
     # (Optional) Bright and Dim foreground colors
     #
@@ -172,48 +172,48 @@ colors:
 
   # Normal colors
   normal:
-    black:   '0x000000'
-    red:     '0xD31C25'
-    green:   '0x728A00'
-    yellow:  '0xA67705'
-    blue:    '0x2177C8'
-    magenta: '0xC61B6F'
-    cyan:    '0x269286'
-    white:   '0x829191'
+    black:   "#262626"
+    red:     '#d70000'
+    green:   '#5f8700'
+    yellow:  '#af8700'
+    blue:    '#0087ff'
+    magenta: '#af005f'
+    cyan:    '#00afaf'
+    white:   '#d7d7af'
 
   # Bright colors
   bright:
-    black:   '0x000000'
-    red:     '0xD31C25'
-    green:   '0x374202'
-    yellow:  '0xA67705'
-    blue:    '0x2177C8'
-    magenta: '0xC61B6F'
-    cyan:    '0x269286'
-    white:   '0x404848'
+    black:   '#1c1c1c'
+    red:     '#d75f00'
+    green:   '#4e4e4e'
+    yellow:  '#585858'
+    blue:    '#0087ff'
+    magenta: '#5f5faf'
+    cyan:    '#8a8a8a'
+    white:   '#ffffd7'
 
   # Dim colors (Optional)
   # dim:
-  #   black:   '0x000000'
-  #   red:     '0xD31C25'
-  #   green:   '0x374202'
-  #   yellow:  '0xA67705'
-  #   blue:    '0x2177C8'
-  #   magenta: '0xC61B6F'
-  #   cyan:    '0x269286'
-  #   white:   '0x404848'
+  #   black:   '#000000'
+  #   red:     '#D31C25'
+  #   green:   '#374202'
+  #   yellow:  '#A67705'
+  #   blue:    '#2177C8'
+  #   magenta: '#C61B6F'
+  #   cyan:    '#269286'
+  #   white:   '#404848'
 
   # Optional: Colors the cursor will use (test)
   cursor:
-    text: '0x708284'
+    text: '#708284'
     # cursor: '0x71798a'
     # cursor: '0xF0FDFF'
     # cursor: '0xe6d3c6'
-    cursor: '0xffd17f'
+    cursor: '#ffd17f'
 
   selection:
-    text: '0x154115'
-    cursor: '0xF0FDFF'
+    text: '#718384'
+    cursor: '#0A2933'
 
 # Visual Bell
 #

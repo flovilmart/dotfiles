@@ -1,6 +1,11 @@
-add_newline=false
-format="${custom.date}$character"
+add_newline = false
+format = "$time$character"
 
-[custom.date]
-command = "date now"
-format = "$output"
+[time]
+disabled = false
+time_format="%R"
+style = "white"
+format = "[$time]($style) "
+
+[character]
+success_symbol = '[\$](red)'

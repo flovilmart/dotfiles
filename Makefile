@@ -63,7 +63,7 @@ alanuship:
 	mkdir -p $(HOME)/.config/alacritty
 	ln -sfn $(CURDIR)/starship.toml $(HOME)/.config/starship.toml
 	ln -sfn $(CURDIR)/starship-short.toml $(HOME)/.config/starship-short.toml
-	ln -sfn $(CURDIR)/alacritty.yaml $(HOME)/.config/alacritty/
+	ln -sfn $(CURDIR)/alacritty.yml $(HOME)/.config/alacritty/
 	ln -sfn $(CURDIR)/.init.nu $(HOME)/.config/.init.nu
 	-cp -n $(CURDIR)/nushell.config.toml "$(shell dirname "$(shell nu -c "config path")")/config.toml"
 	nu -c "blastoff"
