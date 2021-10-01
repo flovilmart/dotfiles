@@ -11,7 +11,8 @@ alias kcsn = kubectl config set-context --current --namespace
 def starship_prompt [] {
   let dur = $nu.env.CMD_DURATION_MS;
   if $dur == "0" {
-    STARSHIP_CONFIG="/Users/florentvilmart/.config/starship-short.toml" starship prompt --cmd-duration $nu.env.CMD_DURATION_MS
+    let-env STARSHIP_CONFIG = (build-string $nu.env.HOME "/.config/starship-short.toml")
+    starship prompt --cmd-duration $nu.env.CMD_DURATION_MS
   } {
     starship prompt --cmd-duration $nu.env.CMD_DURATION_MS
   }
