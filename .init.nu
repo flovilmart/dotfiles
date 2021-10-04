@@ -8,11 +8,17 @@ alias kcuc = kubectl config use-context
 alias kgp = kubectl get pods 
 alias kcsn = kubectl config set-context --current --namespace
 
+def from_toml [path: string] {
+  open $path | get env | pivot | rename name value
+}
+
 def starship_prompt [] {
-  let dur = $nu.env.CMD_DURATION_MS;
-  if $dur == "0" {
-    let-env STARSHIP_CONFIG = (build-string $nu.env.HOME "/.config/starship-short.toml")
-    starship prompt --cmd-duration $nu.env.CMD_DURATION_MS
+  let dur = $nu.env.CMD_DURATION_MS; 
+  let hist = (build-string (dirname (config path) | str trim) "/history.txt")
+  let mod_time = (ls $hist | get modified | date format "%+")
+
+  if ($dur == "0") {
+    starship prompt --right --cmd-duration $nu.env.CMD_DURATION_MS
   } {
     starship prompt --cmd-duration $nu.env.CMD_DURATION_MS
   }

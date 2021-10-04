@@ -153,67 +153,110 @@ debug:
   # Record all characters and escape sequences as test data.
   ref_test: false
 
-
-colors:
-  # Default colors
-  primary:
-    background: '#212121'
-    foreground: '#718384'
-
-    # (Optional) Bright and Dim foreground colors
-    #
-    # The dimmed foreground color is calculated automatically if it is not present.
-    # If the bright foreground color is not set, or `draw_bold_text_with_bright_colors`
-    # is `false`, the normal foreground color will be used.
-    #
-    # dim_foreground: '0x9a9a9a'
-    # bright_foreground: '0xffffff'
-
-
-  # Normal colors
-  normal:
-    black:   "#262626"
-    red:     '#d70000'
-    green:   '#5f8700'
-    yellow:  '#af8700'
-    blue:    '#0087ff'
-    magenta: '#af005f'
-    cyan:    '#00afaf'
-    white:   '#d7d7af'
-
-  # Bright colors
-  bright:
-    black:   '#1c1c1c'
-    red:     '#d75f00'
-    green:   '#4e4e4e'
-    yellow:  '#585858'
-    blue:    '#0087ff'
-    magenta: '#5f5faf'
-    cyan:    '#8a8a8a'
-    white:   '#ffffd7'
-
-  # Dim colors (Optional)
-  # dim:
-  #   black:   '#000000'
-  #   red:     '#D31C25'
-  #   green:   '#374202'
-  #   yellow:  '#A67705'
-  #   blue:    '#2177C8'
-  #   magenta: '#C61B6F'
-  #   cyan:    '#269286'
-  #   white:   '#404848'
-
-  # Optional: Colors the cursor will use (test)
-  cursor:
+# Colors (Snazzy)
+schemes:
+  default_cursor: &default_cursor
     text: '#708284'
     # cursor: '0x71798a'
     # cursor: '0xF0FDFF'
     # cursor: '0xe6d3c6'
     cursor: '#ffd17f'
 
-  selection:
+  default_selection:  &default_selection
     text: '#718384'
     cursor: '#0A2933'
+
+  wombat: &wombat
+    cursor: *default_cursor
+    selection: *default_selection
+    # Default colors
+    primary:
+      background: '#1f1f1f'
+      foreground: '#e5e1d8'
+
+    # Normal colors
+    normal:
+      black:   '#000000'
+      red:     '#f7786d'
+      green:   '#bde97c'
+      yellow:  '#efdfac'
+      blue:    '#6ebaf8'
+      magenta: '#ef88ff'
+      cyan:    '#90fdf8'
+      white:   '#e5e1d8'
+
+    # Bright colors
+    bright:
+      black:   '#b4b4b4'
+      red:     '#f99f92'
+      green:   '#e3f7a1'
+      yellow:  '#f2e9bf'
+      blue:    '#b3d2ff'
+      magenta: '#e5bdff'
+      cyan:    '#c2fefa'
+      white:   '#ffffff'
+  
+  snazzy: &snazzy
+    cursor: *default_cursor
+    selection: *default_selection
+    # Default colors
+    primary:
+      background: '#282a36'
+      foreground: '#eff0eb'
+  
+    # Normal colors
+    normal:
+      black:   '#282a36'
+      red:     '#ff5c57'
+      green:   '#5af78e'
+      yellow:  '#f3f99d'
+      blue:    '#57c7ff'
+      magenta: '#ff6ac1'
+      cyan:    '#9aedfe'
+      white:   '#f1f1f0'
+  
+    # Bright colors
+    bright:
+      black:   '#686868'
+      red:     '#ff5c57'
+      green:   '#5af78e'
+      yellow:  '#f3f99d'
+      blue:    '#57c7ff'
+      magenta: '#ff6ac1'
+      cyan:    '#9aedfe'
+      white:   '#f1f1f0'
+
+  solaized: &solarized
+    cursor: *default_cursor
+    selection: *default_selection
+    # Default colors
+    primary:
+      background: '#212121'
+      foreground: '#718384'
+  
+    # Normal colors
+    normal:
+      yellow: "#b58900"
+      orange: "#cb4b16"
+      red: "#dc322f"
+      magenta: "#d33682"
+      blue: "#268bd2"
+      cyan: "#2aa198"
+      green: "#719e07" 
+      black: "#073642"
+  
+    # Bright colors
+    bright:
+      black:   '#002b36'
+      red:     '#cb4b16'
+      green:   '#4e4e4e'
+      yellow:  '#585858'
+      blue:    '#808080'
+      magenta: "#6c71c4"
+      cyan:    '#8a8a8a'
+      white:   '#ffffd7'
+  
+colors: *solarized
 
 # Visual Bell
 #
