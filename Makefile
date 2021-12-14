@@ -32,12 +32,13 @@ ruby: brew_bundle_ruby
 	gem install rails --version=6.0.1 --no-document
 
 node: brew_bundle_lang
-	N_PREFIX=$(HOME)/n n lts
-	N_PREFIX=$(HOME)/n npm install -g typescript eslint prettier;
+	curl https://get.volta.sh | bash
+	volta install node
+	npm install -g typescript eslint prettier;
 
 .PHONY: vim
 vim: submodules
-	ln -sfn $(CURDIR)/vimrc $(HOME)/.vim
+	ln -sfn $(CURDIR)/vimrc $(HOME)/.config/nvim/init.vim
 	sh $(HOME)/.vim/install.sh
 
 .PHONY: tmux_plugins
@@ -67,4 +68,3 @@ alanuship:
 	ln -sfn $(CURDIR)/.init.nu $(HOME)/.config/.init.nu
 	-cp -n $(CURDIR)/nushell.config.toml "$(shell dirname "$(shell nu -c "config path")")/config.toml"
 	nu -c "blastoff"
-

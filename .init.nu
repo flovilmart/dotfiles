@@ -5,7 +5,7 @@ def blastoff [] {
 
 alias k = kubectl
 alias kcuc = kubectl config use-context
-alias kgp = kubectl get pods 
+alias kgp = kubectl get pods
 alias kcsn = kubectl config set-context --current --namespace
 
 def from_toml [path: string] {
@@ -13,7 +13,7 @@ def from_toml [path: string] {
 }
 
 def starship_prompt [] {
-  let dur = $nu.env.CMD_DURATION_MS; 
+  let dur = $nu.env.CMD_DURATION_MS;
   let hist = (build-string (dirname (config path) | str trim) "/history.txt")
   let mod_time = (ls $hist | get modified | date format "%+")
 
@@ -31,12 +31,20 @@ def sonder_aws_config [dest] {
 def kswitch [dest] {
   let envs = (sonder_aws_config $dest)
   let namespaces = [["env", "namespace"]; ["staging", "preview"] ["prod", "production"]]
-  
+
   let ns = (echo $namespaces | where env == $dest | get namespace)
-  echo "Switching to $ns" 
   kcsn $ns
   echo $envs
 }
 
-alias kswitch_prod = load-env (kswitch prod) 
-alias kswitch_stage = load-env (kswitch staging) 
+def ambassador [] {
+  echo "Visit http://127.0.0.1:8877/ambassador/v0/diag/"
+  kubectl -n ambassador port-forward service/ambassador-admin 8877:8877
+}
+
+def klogs [app_name] {
+  k logs -l app.kubernetes.io/name=$app_name
+}
+
+alias kswitch_prod = load-env (kswitch prod)
+alias kswitch_stage = load-env (kswitch staging)

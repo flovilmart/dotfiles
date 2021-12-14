@@ -195,7 +195,7 @@ schemes:
       magenta: '#e5bdff'
       cyan:    '#c2fefa'
       white:   '#ffffff'
-  
+
   snazzy: &snazzy
     cursor: *default_cursor
     selection: *default_selection
@@ -203,7 +203,7 @@ schemes:
     primary:
       background: '#282a36'
       foreground: '#eff0eb'
-  
+
     # Normal colors
     normal:
       black:   '#282a36'
@@ -214,7 +214,7 @@ schemes:
       magenta: '#ff6ac1'
       cyan:    '#9aedfe'
       white:   '#f1f1f0'
-  
+
     # Bright colors
     bright:
       black:   '#686868'
@@ -233,21 +233,21 @@ schemes:
     primary:
       background: '#212121'
       foreground: '#718384'
-  
+
     # Normal colors
     normal:
-      yellow: "#b58900"
-      orange: "#cb4b16"
-      red: "#dc322f"
-      magenta: "#d33682"
-      blue: "#268bd2"
-      cyan: "#2aa198"
-      green: "#719e07" 
       black: "#073642"
-  
+      red: "#dc322f"
+      green: "#719e07"
+      yellow: "#b58900"
+      blue: "#268bd2"
+      magenta: "#d33682"
+      cyan: "#2aa198"
+      orange: "#cb4b16"
+
     # Bright colors
     bright:
-      black:   '#002b36'
+      black:   '#b58900'
       red:     '#cb4b16'
       green:   '#4e4e4e'
       yellow:  '#585858'
@@ -255,7 +255,7 @@ schemes:
       magenta: "#6c71c4"
       cyan:    '#8a8a8a'
       white:   '#ffffd7'
-  
+
 colors: *solarized
 
 # Visual Bell

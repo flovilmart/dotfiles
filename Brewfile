@@ -19,7 +19,6 @@ brew "redis"
 brew "telnet"
 brew "tmux"
 brew "the_silver_searcher"
-brew "vim"
+brew "nvim"
 brew "watch"
 brew "wget"
-

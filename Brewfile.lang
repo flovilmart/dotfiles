@@ -1,6 +1,5 @@
 cask "homebrew/cask-versions/adoptopenjdk8"
 brew "erlang"
 brew "go"
-brew "n"
 brew "python@3.8"
 
