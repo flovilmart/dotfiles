@@ -13,6 +13,7 @@ $time$character"""
 
 # Right format is used for short format
 right_format = "$time$character"
+short_format = "$time$character"
 
 [cmd_duration]
 disabled = true
