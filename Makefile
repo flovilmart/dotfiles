@@ -38,8 +38,8 @@ node: brew_bundle_lang
 
 .PHONY: vim
 vim: submodules
-	ln -sfn $(CURDIR)/vimrc $(HOME)/.config/nvim/init.vim
-	sh $(HOME)/.vim/install.sh
+	cd $(CURDIR)/vimrc
+	make
 
 .PHONY: tmux_plugins
 tmux_plugins: submodules

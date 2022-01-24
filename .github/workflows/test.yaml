@@ -1,0 +1,8 @@
+on: push
+jobs:
+  build:
+    runs-on: macos-11
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install
+        run: make
