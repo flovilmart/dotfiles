@@ -8,4 +8,5 @@ jobs:
         run: |
           rm /usr/local/bin/aws
           rm /usr/local/bin/aws*
+          rm /usr/local/bin/go
           make
