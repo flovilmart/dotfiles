@@ -32,8 +32,8 @@ ruby: brew_bundle_ruby
 
 node: brew_bundle_lang
 	curl https://get.volta.sh | bash
-	volta install node
-	npm install -g typescript eslint prettier;
+	~/.volta/bin/volta install node
+	~/.volta/bin/npm install -g typescript eslint prettier;
 
 .PHONY: vim
 vim: submodules
@@ -62,8 +62,8 @@ alanuship:
 	brew install alacritty nushell starship
 	mkdir -p $(HOME)/.config/alacritty
 	ln -sfn $(CURDIR)/starship.toml $(HOME)/.config/starship.toml
-	ln -sfn $(CURDIR)/starship-short.toml $(HOME)/.config/starship-short.toml
 	ln -sfn $(CURDIR)/alacritty.yml $(HOME)/.config/alacritty/
 	ln -sfn $(CURDIR)/.init.nu $(HOME)/.config/.init.nu
 	-cp -n $(CURDIR)/nushell.config.toml "$(shell dirname "$(shell nu -c "config path")")/config.toml"
+	touch $(HOME)/.config/nu.env.toml
 	nu -c "blastoff"
