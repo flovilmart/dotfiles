@@ -5,4 +5,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install
-        run: make
+        run: |
+          rm /usr/local/bin/aws
+          make

@@ -1,4 +1,3 @@
-
 .PHONY: all
 all: brew brew_bundle node ruby dotfiles vim tmux_plugins prezto
 
