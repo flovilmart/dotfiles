@@ -7,4 +7,5 @@ jobs:
       - name: Install
         run: |
           rm /usr/local/bin/aws
+          rm /usr/local/bin/aws*
           make
