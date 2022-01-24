@@ -1,6 +1,6 @@
 tap "homebrew/cask"
 brew "rbenv"
 brew "ruby-build"
-brew "yarn"
+brew "shared-mime-info"
 cask "chromedriver"
 

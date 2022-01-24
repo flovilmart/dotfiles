@@ -1,4 +1,3 @@
-
 .PHONY: all
 all: brew brew_bundle node ruby dotfiles vim tmux_plugins prezto
 
@@ -16,6 +15,7 @@ submodules:
 
 brew:
 	which brew || curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh | bash
+
 brew_bundle:
 	brew bundle
 	brew bundle --file=Brewfile.cloud
@@ -33,13 +33,12 @@ ruby: brew_bundle_ruby
 
 node: brew_bundle_lang
 	curl https://get.volta.sh | bash
-	volta install node
-	npm install -g typescript eslint prettier;
+	~/.volta/bin/volta install node
+	~/.volta/bin/npm install -g typescript eslint prettier;
 
 .PHONY: vim
 vim: submodules
-	ln -sfn $(CURDIR)/vimrc $(HOME)/.config/nvim/init.vim
-	sh $(HOME)/.vim/install.sh
+	cd $(CURDIR)/vimrc && make
 
 .PHONY: tmux_plugins
 tmux_plugins: submodules
@@ -63,8 +62,8 @@ alanuship:
 	brew install alacritty nushell starship
 	mkdir -p $(HOME)/.config/alacritty
 	ln -sfn $(CURDIR)/starship.toml $(HOME)/.config/starship.toml
-	ln -sfn $(CURDIR)/starship-short.toml $(HOME)/.config/starship-short.toml
 	ln -sfn $(CURDIR)/alacritty.yml $(HOME)/.config/alacritty/
 	ln -sfn $(CURDIR)/.init.nu $(HOME)/.config/.init.nu
 	-cp -n $(CURDIR)/nushell.config.toml "$(shell dirname "$(shell nu -c "config path")")/config.toml"
+	touch $(HOME)/.config/nu.env.toml
 	nu -c "blastoff"

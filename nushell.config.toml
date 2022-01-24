@@ -1,12 +1,10 @@
-"env.CMD_LAST_EXEC" = "2021-10-02T22:13:44.562023918+00:00"
-path = ["/Users/florent/.rbenv/shims", "/Users/florent/.cargo/bin", "/usr/local/bin", "/usr/bin", "/bin", "/usr/sbin", "/sbin", "/usr/local/MacGPG2/bin", "/usr/local/share/dotnet", "/opt/X11/bin", "/Applications/Server.app/Contents/ServerRoot/usr/bin", "/Applications/Server.app/Contents/ServerRoot/usr/sbin", "/Library/Apple/usr/bin", "/Library/Frameworks/Mono.framework/Versions/Current/Commands", "/usr/local/git/bin", "/Users/florent/n/bin", "/Users/florent/.fzf/bin"]
+path = ["/Users/florent/.volta/bin", "/Users/florent/.rbenv/shims", "/Users/florent/.cargo/bin", "/usr/local/bin", "/usr/bin", "/bin", "/usr/sbin", "/sbin", "/usr/local/MacGPG2/bin", "/usr/local/share/dotnet", "/opt/X11/bin", "/Applications/Server.app/Contents/ServerRoot/usr/bin", "/Applications/Server.app/Contents/ServerRoot/usr/sbin", "/Library/Apple/usr/bin", "/Library/Frameworks/Mono.framework/Versions/Current/Commands", "/usr/local/git/bin", "/Users/florent/n/bin", "/Users/florent/.fzf/bin"]
 prompt = "starship_prompt"
 skip_welcome_message = "true"
 startup = ["source ~/.config/.init.nu", "from_toml ~/.config/nu.env.toml | load-env"]
 table_mode = "light"
 
 [env]
-CMD_DURATION_MS = "20134"
 HOME = "/Users/florent"
 LANG = "en_CA.UTF-8"
 LOGNAME = "florent"
