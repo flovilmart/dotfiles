@@ -15,6 +15,7 @@ submodules:
 
 brew:
 	which brew || curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh | bash
+
 brew_bundle:
 	brew bundle
 	brew bundle --file=Brewfile.cloud
@@ -37,8 +38,7 @@ node: brew_bundle_lang
 
 .PHONY: vim
 vim: submodules
-	cd $(CURDIR)/vimrc
-	make
+	cd $(CURDIR)/vimrc && make
 
 .PHONY: tmux_plugins
 tmux_plugins: submodules
