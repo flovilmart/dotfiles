@@ -7,23 +7,30 @@ $git_commit\
 $git_state\
 $git_metrics\
 $git_status \
+$aws\
 $kubernetes\
 $line_break\
 $time$character"""
 
 # Right format is used for short format
-right_format = "$time$character"
-short_format = "$time$character"
+right_format = "${custom.foo}${custom.reset}$time$character"
 
 [cmd_duration]
-disabled = true
+disabled = false
 min_time = 0
 format = "underwent [$duration](bold yellow)"
+
+[aws]
+disabled = false
 
 [kubernetes]
 disabled = false
 style = "blue"
 format = '(\[$symbol[$context:$namespace]($style)\])'
+
+# [kubernetes.context_aliases]
+# "dev.local.cluster.k8s" = "dev"
+# "arn:aws:eks:(?P<var_region>[\\w-]+).*:cluster/(?P<var_cluster>[\\w-]+)" = "($var_region) $var_cluster"
 
 [git_status]
 modified = "±"
@@ -39,12 +46,12 @@ format = '\([$branch]($style)'
 [directory]
 truncation_length = 8
 truncate_to_repo = false
-style = "blue"
+style = "cyan bold"
 
 [time]
 disabled = false
 time_format="%R"
-style = "white"
+style = "white dimmed bold"
 format = "[$time]($style) "
 
 [character]
