@@ -19,3 +19,7 @@ export PATH="$HOME/.poetry/bin:$PATH"
 export PATH="/usr/local/opt/kubernetes-cli@1.22/bin:$PATH"
 export VOLTA_HOME="$HOME/.volta"
 export PATH="$VOLTA_HOME/bin:$PATH"
+
+export ANDROID_SDK_ROOT=$HOME/Library/Android/sdk
+export PATH=$PATH:$ANDROID_SDK_ROOT/emulator
+export PATH=$PATH:$ANDROID_SDK_ROOT/platform-tools

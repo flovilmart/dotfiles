@@ -2,6 +2,7 @@
 	name = Florent Vilmart
 	email = florent@flovilmart.com
 	signingkey = 4A0441A2
+	handle = flovilmart
 [core]
 	excludesfile = ~/.gitignore_global
 	ignorecase = true
@@ -40,6 +41,11 @@
 	st = status
   main = !git co main && git pull origin main
 	pr-web = !gh pr view -w
-	pr = !gh pr
+	pr = !(gh pr create -f || echo "OK!") && yarn update:changelog && git push && gh pr view -w
 	pr-view = !gh pr view -w
   hub = !gh
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
