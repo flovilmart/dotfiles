@@ -9,7 +9,9 @@ if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh"  ]]; then
    source "${ZDOTDIR:-$HOME}/.zprezto/init.zsh"
 fi
 
+export PATH=/opt/homebrew/bin/:${PATH}
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+eval "$(rbenv init - zsh)"
 
 bindkey "^E" end-of-line # Map end-of-line key in the same way as zprezto editor module to prevent issue with tmux-resurrect.
 bindkey "^U" backward-kill-line

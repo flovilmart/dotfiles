@@ -11,3 +11,6 @@ alias docker_clean_all="docker_clean_volumes && docker_clean_images"
 alias gfm="git fetch origin master"
 alias gpm="git pull origin master"
 
+alias vim="nvim"
+alias vi="nvim"
+
