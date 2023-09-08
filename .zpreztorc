@@ -1,22 +1,42 @@
 # Set the Prezto modules to load (browse modules).
 # The order matters.
-zstyle ':prezto:load' pmodule \
-  'directory' \
-  'utility' \
-  'completion' \
-  'k8s' \
-  'git' \
-  'prompt' \
-  'fasd' \
-  'syntax-highlighting' \
-  'history-substring-search' \
-  'history' \
-  'autosuggestions' \
-  'rails' \
-  'ruby' \
+
+configure_starship() {
+  zstyle ':prezto:load' pmodule \
+    'directory' \
+    'utility' \
+    'completion' \
+    'prompt' \
+    'fasd' \
+    'syntax-highlighting' \
+    'history-substring-search' \
+    'history' \
+    'autosuggestions'
+  zstyle ':prezto:module:prompt' theme 'starship'
+}
+
+configure_zimple() {
+  zstyle ':prezto:load' pmodule \
+    'directory' \
+    'utility' \
+    'completion' \
+    'k8s' \
+    'git' \
+    'prompt' \
+    'fasd' \
+    'syntax-highlighting' \
+    'history-substring-search' \
+    'history' \
+    'autosuggestions' \
+    'rails' \
+    'ruby'
+
+  zstyle ':prezto:module:prompt' theme 'zimple'
+}
 
 # prompt options
-zstyle ':prezto:module:prompt' theme 'zimple'
+# configure_starship
+configure_zimple
 zstyle ':prezto:module:autosuggestions' color 'yes'
 zstyle ':prezto:module:autosuggestions:color' found 'bg=none,fg=yellow'
 
@@ -28,4 +48,3 @@ bindkey '^[[A' history-substring-search-up
 bindkey '^[[B' history-substring-search-down
 bindkey -M vicmd 'k' history-substring-search-up
 bindkey -M vicmd 'j' history-substring-search-down
-

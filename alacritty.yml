@@ -360,7 +360,7 @@ live_config_reload: true
 #     - --login
 
 shell:
-  program: /usr/local/bin/nu
+  program: /bin/zsh
 
 # Key bindings
 #

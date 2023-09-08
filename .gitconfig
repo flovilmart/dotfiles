@@ -44,6 +44,7 @@
 	pr = !(gh pr create -f || echo "OK!") && yarn update:changelog && git push && gh pr view -w
 	pr-view = !gh pr view -w
   hub = !gh
+  fix = !git commit --amend --no-edit && git push -f
 [filter "lfs"]
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
