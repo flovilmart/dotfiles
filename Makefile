@@ -8,6 +8,8 @@ dotfiles:
 		echo $$file; \
 		ln -sfn $$file $(HOME)/$$f; \
 	done; \
+	mkdir -p $(HOME)/.config/kitty; \
+	ln -sfn $(CURDIR)/kitty.conf $(HOME)/.config/kitty
 
 .PHONY: submodules
 submodules:
