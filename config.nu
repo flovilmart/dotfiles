@@ -77,6 +77,13 @@ $env.config = {
       keycode: char_f,
       mode: [emacs, vi_insert],
       event: { edit: movewordright }
-    }
+    }, {
+      name: "delete_word",
+      modifier: alt,
+      keycode: backspace,
+      mode: [emacs, vi_insert],
+      event: { edit: backspaceword }
+
+      }
   ]
 }
