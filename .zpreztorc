@@ -35,8 +35,14 @@ configure_zimple() {
 }
 
 # prompt options
-# configure_starship
-configure_zimple
+export USE_ZIMPLE=1
+
+if [ "$USE_ZIMPLE" = "1" ]; then
+  configure_zimple
+else
+  configure_starship
+fi
+
 zstyle ':prezto:module:autosuggestions' color 'yes'
 zstyle ':prezto:module:autosuggestions:color' found 'bg=none,fg=yellow'
 
