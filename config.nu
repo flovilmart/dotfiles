@@ -65,6 +65,18 @@ $env.config = {
       keycode: char_f,
       mode: vi_insert,
       event: { send: executehostcommand, cmd: "fzf" }
+    }, {
+      name: "move_to_start",
+      modifier: alt,
+      keycode: char_b,
+      mode: [emacs, vi_insert],
+      event: { edit: movewordleft }
+    }, {
+      name: "move_to_end",
+      modifier: alt,
+      keycode: char_f,
+      mode: [emacs, vi_insert],
+      event: { edit: movewordright }
     }
   ]
 }
