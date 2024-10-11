@@ -1,4 +1,3 @@
-
 alias k = kubectl
 alias kcuc = kubectl config use-context
 alias kgp = kubectl get pods
@@ -38,7 +37,6 @@ def klogs [app_name] {
 
 alias kswitch_prod = load-env (kswitch prod)
 alias kswitch_stage = load-env (kswitch staging)
-
 
 def "nu-complete git branches" [] {
   ^git branch | lines | each { |line| $line | str replace '\* ' '' | str trim }
