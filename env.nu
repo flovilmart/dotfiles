@@ -2,10 +2,11 @@
 
 open ~/.config/nu.env.toml | get env | load-env
 
-def starship_prompt [] {
+def starship_prompt [short_prompt = false] {
   let dur = $env.CMD_DURATION_MS;
+  let short_prompt = $short_prompt # or $dur == "0" or $dur == "";
 
-  if ($dur == "0" or $dur == "") {
+  if ($short_prompt == true) {
     starship prompt --profile short --cmd-duration $env.CMD_DURATION_MS $'--status=($env.LAST_EXIT_CODE)' | decode utf8 | str trim --right
   } else {
     starship prompt --cmd-duration $env.CMD_DURATION_MS $'--status=($env.LAST_EXIT_CODE)' | decode utf8 | str trim --right
@@ -20,6 +21,9 @@ $env.PROMPT_COMMAND_RIGHT = ""
 $env.PROMPT_INDICATOR_VI_INSERT = ' '
 $env.PROMPT_INDICATOR_VI_NORMAL = '〉'
 $env.PROMPT_MULTILINE_INDICATOR = '::: '
+$env.TRANSIENT_PROMPT_COMMAND = {
+  starship_prompt true
+}
 
 $env.EDITOR = "vim"
 
