@@ -1,3 +1,5 @@
+use nushell_mods/ *
+
 alias k = kubectl
 alias kcuc = kubectl config use-context
 alias kgp = kubectl get pods

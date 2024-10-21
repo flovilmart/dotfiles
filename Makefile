@@ -59,13 +59,14 @@ jira:
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-NU_ENV_PATH = $(HOME)/Library/Application\ Support/nushell
+NU_CONFIG_HOME = $(HOME)/Library/Application\ Support/nushell
 
 .PHONY: nushell
 nushell:
-	mkdir -p $(NU_ENV_PATH)
-	ln -sfn $(CURDIR)/env.nu $(NU_ENV_PATH)/env.nu
-	ln -sfn $(CURDIR)/config.nu $(NU_ENV_PATH)/config.nu
+	mkdir -p $(NU_CONFIG_HOME)
+	ln -sfn $(CURDIR)/env.nu $(NU_CONFIG_HOME)/env.nu
+	ln -sfn $(CURDIR)/config.nu $(NU_CONFIG_HOME)/config.nu
+	ln -sfn $(CURDIR)/nushell_mods $(NU_CONFIG_HOME)/nushell_mods
 
 .PHONY: alanuship
 alanuship:
