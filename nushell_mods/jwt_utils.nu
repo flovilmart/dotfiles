@@ -1,16 +1,18 @@
 use std assert
 use ./utils.nu default_value
 
-def part_to_record [part: string] {
-  $part | decode new-base64 --nopad | decode | from json
-}
-
 export def jwt [token?: string] {
+  def b64_to_record [] { $in | decode new-base64 --nopad | decode | from json; }
+
   let token = default_value $token $in
   let parts = $token | split row "."
-  let header = part_to_record $parts.0
-  let payload = part_to_record $parts.1
-  let sig = $parts.2
+  assert (($parts | length) >= 2) "expected to have 3 components separated by ."
+  let header = $parts.0 | b64_to_record
+  let payload = $parts.1 | b64_to_record
+  mut sig = null
+  if ($parts | length) == 3 {
+    $sig = $parts.2
+  }
   {
     header: $header
     payload: $payload
