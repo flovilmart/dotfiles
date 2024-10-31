@@ -64,9 +64,9 @@ NU_CONFIG_HOME = $(HOME)/Library/Application\ Support/nushell
 .PHONY: nushell
 nushell:
 	mkdir -p $(NU_CONFIG_HOME)
-	ln -sfn $(CURDIR)/env.nu $(NU_CONFIG_HOME)/env.nu
-	ln -sfn $(CURDIR)/config.nu $(NU_CONFIG_HOME)/config.nu
-	ln -sfn $(CURDIR)/nushell_mods $(NU_CONFIG_HOME)/nushell_mods
+	ln -sfn $(CURDIR)/nushell/env.nu $(NU_CONFIG_HOME)/env.nu
+	ln -sfn $(CURDIR)/nushell/config.nu $(NU_CONFIG_HOME)/config.nu
+	ln -sfn $(CURDIR)/nushell/scripts $(NU_CONFIG_HOME)/scripts
 
 .PHONY: alanuship
 alanuship:

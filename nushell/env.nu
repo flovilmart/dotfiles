@@ -70,3 +70,6 @@ $env.NU_LIB_DIRS = [
 $env.NU_PLUGIN_DIRS = [
     ($nu.config-path | path dirname | path join 'plugins')
 ]
+
+# Load the JWT Utils in the main shell
+use jwt_utils.nu *
