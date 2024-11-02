@@ -6,6 +6,7 @@
 [core]
 	excludesfile = ~/.gitignore_global
 	ignorecase = true
+  editor = nvim
 [push]
 	default = current
 	recurseSubmodules = check
