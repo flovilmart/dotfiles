@@ -61,7 +61,7 @@ node() {
 
 vim() {
   submodules
-  cd $(pwd)/vimrc && make
+  cd $(pwd)/vimrc && ./install.sh all
 }
 
 tmux_plugins() {
