@@ -1,6 +1,6 @@
 on: push
 env:
-  IMAGE_NAME: flovilmart/dev-env
+  IMAGE_NAME: flovilmart/dotfiles
 jobs:
   docker:
     name: Docker build
@@ -19,12 +19,18 @@ jobs:
 
       - name: Submodules
         run: sh ./install.sh submodules
-      - name: Build and push
-        uses: docker/build-push-action@v6
-        with:
-          ssh: default
-          push: true
-          tags: flovilmart/dotfiles:latest
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-          registry: ghcr.io
+      - name: Log in to registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Build image
+        run: DOCKER_BUILDKIT=1 docker buildx build . --file Dockerfile --tag $IMAGE_NAME --progress plain --ssh default --label "runnumber=${GITHUB_RUN_ID}"
+      - name: Push image
+        run: |
+          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          [ "$VERSION" == "main" ] && VERSION=latest
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
