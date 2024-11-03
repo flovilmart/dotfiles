@@ -1,6 +1,6 @@
 on: push
 env:
-  IMAGE_NAME: flovilmart/dotfiles
+  IMAGE_NAME: flovilmart/dev-env
 jobs:
   docker:
     name: Docker build
