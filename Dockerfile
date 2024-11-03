@@ -11,7 +11,7 @@ COPY . .
 
 RUN ./install.sh dotfiles
 RUN ./install.sh nushell
-RUN ./install.sh fix_tmux_nu_path
+RUN ./install.sh fix_nu_path
 RUN ./install.sh tmux_plugins
 RUN ./install.sh starship
 # Adds SSH keys to make sure we can clone submodules

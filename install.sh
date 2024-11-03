@@ -19,10 +19,20 @@ dotfiles() {
 	ln -sfn $(pwd)/kitty.conf ${HOME}/.config/kitty
 }
 
-fix_tmux_nu_path() {
+fix_nu_path() {
   NU_INSTALL_PATH=$(which nu)
-  sed -i "s#/opt/homebrew/bin/nu#${NU_INSTALL_PATH}#" ./.tmux.conf
+  if [ -z "${NU_INSTALL_PATH}" ]; then
+    echo "Nu not found in path. Please install Nu and try again"
+    exit 1
+  fi
+  if [ "${NU_INSTALL_PATH}" == "/opt/homebrew/bin/nu" ]; then
+    echo "nothing to do..."
+  else
+    sed -i "s#/opt/homebrew/bin/nu#${NU_INSTALL_PATH}#" ./.tmux.conf
+    sed -i "s#/opt/homebrew/bin/nu#${NU_INSTALL_PATH}#" ./vimrc/plugin/after/styling.lua
+  fi
 }
+
 
 submodules() {
   if [ -d .git ]; then
