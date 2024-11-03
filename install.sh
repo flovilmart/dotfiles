@@ -20,7 +20,10 @@ dotfiles() {
 	ln -sfn $(pwd)/kitty.conf ${HOME}/.config/kitty
 }
 
-
+fix_tmux_nu_path() {
+  NU_INSTALL_PATH=$(which nu)
+  sed -i "s#/opt/homebrew/bin/nu#${NU_INSTALL_PATH}#" ./.tmux.conf
+}
 
 submodules() {
 	git submodule update --init --recursive
@@ -53,7 +56,6 @@ ruby() {
 }
 
 node() {
-  brew_bundle_lang
 	curl https://get.volta.sh | bash
 	~/.volta/bin/volta install node
 	~/.volta/bin/npm install -g typescript eslint prettier;
@@ -61,7 +63,7 @@ node() {
 
 vim() {
   submodules
-  cd $(pwd)/vimrc && ./install.sh all
+  cd $(pwd)/vimrc && sh ./install.sh all
 }
 
 tmux_plugins() {
@@ -82,21 +84,32 @@ nushell() {
   NU_CONFIG_DIR=$(nu -c '$nu.default-config-dir')
   NU_CONFIG=${NU_CONFIG_DIR}/config.nu
   NU_ENV=${NU_CONFIG_DIR}/env.nu
+  mkdir -p ${NU_CONFIG_DIR}
+  mkdir -p ${HOME}/.config
   touch ${HOME}/.config/nu.env.toml
 	ln -sfn $(pwd)/nushell/env.nu "${NU_ENV}"
 	ln -sfn $(pwd)/nushell/config.nu "${NU_CONFIG}"
 	ln -sfn $(pwd)/nushell/scripts "${NU_CONFIG_DIR}/scripts"
 }
 
+starship() {
+  ln -sfn $(pwd)/starship.toml ${HOME}/.config/starship.toml
+}
+
 alanuship() {
-	brew install alacritty nushell starship
+	which brew && brew install alacritty nushell starship
+  mkdir -p ${HOME}/.config
 	mkdir -p ${HOME}/.config/alacritty
-	ln -sfn $(pwd)/starship.toml ${HOME}/.config/starship.toml
 	ln -sfn $(pwd)/alacritty.yml ${HOME}/.config/alacritty/
 
+  starship
   # Copy the nushell config
   nushell
 }
 
-# Run the command passed in
-$1
+# Check which function to invoke
+invoke=$1
+shift
+
+# Invoke the function and pass args
+$invoke $@
