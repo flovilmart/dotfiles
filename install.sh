@@ -25,7 +25,11 @@ fix_tmux_nu_path() {
 }
 
 submodules() {
-	git submodule update --init --recursive
+  if [ -d .git ]; then
+    git submodule update --init --recursive
+  else
+    echo "Not a git repo... skipping submodules"
+  fi
 }
 
 brew() {
@@ -61,12 +65,10 @@ node() {
 }
 
 vim() {
-  submodules
   cd $(pwd)/vimrc && sh ./install.sh all
 }
 
 tmux_plugins() {
-  submodules
 	mkdir -p ${HOME}/.tmux/plugins
 	ln -sfn $(pwd)/tpm ${HOME}/.tmux/plugins
 }
