@@ -82,6 +82,7 @@ nushell() {
   NU_CONFIG_DIR=$(nu -c '$nu.default-config-dir')
   NU_CONFIG=${NU_CONFIG_DIR}/config.nu
   NU_ENV=${NU_CONFIG_DIR}/env.nu
+  touch ${HOME}/.config/nu.env.toml
 	ln -sfn $(pwd)/nushell/env.nu "${NU_ENV}"
 	ln -sfn $(pwd)/nushell/config.nu "${NU_CONFIG}"
 	ln -sfn $(pwd)/nushell/scripts "${NU_CONFIG_DIR}/scripts"
