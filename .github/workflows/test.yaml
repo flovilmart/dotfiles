@@ -25,3 +25,6 @@ jobs:
           ssh: default
           push: true
           tags: flovilmart/dotfiles:latest
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io
