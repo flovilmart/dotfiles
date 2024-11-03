@@ -1,6 +1,8 @@
 # Nushell Environment Config File
 
-open ~/.config/nu.env.toml | get env | load-env
+try {
+  open ~/.config/nu.env.toml | get env | load-env
+} catch {}
 
 def starship_prompt [short_prompt = false] {
   let dur = $env.CMD_DURATION_MS;
@@ -43,8 +45,9 @@ $env.PATH = ($env.PATH | prepend $"($env.HOME)/.rd/bin")
 $env.PATH = ($env.PATH | prepend $"($env.HOME)/.volta/bin")
 $env.PATH = ($env.PATH | prepend $"/usr/local/opt/kubernetes-cli@1.22/bin")
 
-
-$env.HOMEBREW_GITHUB_API_TOKEN = $env.GITHUB_TOKEN
+if ('GITHUB_TOKEN' in $env) {
+  $env.HOMEBREW_GITHUB_API_TOKEN = $env.GITHUB_TOKEN
+}
 
 # Specifies how environment variables are:
 # - converted from a string to a value on Nushell startup (from_string)

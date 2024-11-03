@@ -81,7 +81,6 @@ $env.config = {
       keycode: backspace,
       mode: [emacs, vi_insert],
       event: { edit: backspaceword }
-
-      }
+    }
   ]
 }

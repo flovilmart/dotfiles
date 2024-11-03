@@ -2,7 +2,7 @@ use std assert
 use ./utils.nu default_value
 
 export def jwt [token?: string] {
-  def b64_to_record [] { $in | decode new-base64 --nopad | decode | from json; }
+  def b64_to_record [] { $in | decode base64 --nopad | decode | from json; }
 
   let token = default_value $token $in
   let parts = $token | split row "."
@@ -47,11 +47,11 @@ export def verify_signature [token: string, jwks?: string] {
   let signer = $key | select e kty n
   print $signer.n
 
-  let n = $signer.n | decode new-base64 --nopad --url | encode hex
-  let e = $signer.e | decode new-base64 --nopad --url | encode hex
+  let n = $signer.n | decode base64 --nopad --url | encode hex
+  let e = $signer.e | decode base64 --nopad --url | encode hex
 
 
   let len = ($n | str length)
 
-  print { len: $len, signer_n: $signer.n, enc_n: ($signer.n | encode new-base64), signer_e: $signer.e, n: $n, e: $e, hash: $hash, sig: $parts.2 } | to json
+  print { len: $len, signer_n: $signer.n, enc_n: ($signer.n | encode base64), signer_e: $signer.e, n: $n, e: $e, hash: $hash, sig: $parts.2 } | to json
 }
