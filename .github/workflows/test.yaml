@@ -10,32 +10,15 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
-      - name: Build image
-        run: docker build . --file Dockerfile --tag $IMAGE_NAME --progress plain --ssh default --label "runnumber=${GITHUB_RUN_ID}"
-      - name: Log in to registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-      - name: Push image
-        run: |
-          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
-
-          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-
-          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-
-          [ "$VERSION" == "main" ] && VERSION=latest
-          echo IMAGE_ID=$IMAGE_ID
-          echo VERSION=$VERSION
-          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
-          docker push $IMAGE_ID:$VERSION
-  build:
-    runs-on: macos-11
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install
-        run: |
-          rm /usr/local/bin/aws
-          rm /usr/local/bin/aws*
-          rm /usr/local/bin/go
-          rm /usr/local/bin/go*
-          ./install.sh all
+      - name: Set up SSH
+        uses: MrSquaare/ssh-setup-action@2d028b70b5e397cf8314c6eaea229a6c3e34977a # v3.1.0
+        with:
+          host: github.com
+          private-key: ${{ secrets.SSH_GITHUB_PPK }}
+          private-key-name: github-ppk
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          ssh: default
+          push: true
+          tags: flovilmart/dotfiles:latest
