@@ -16,6 +16,9 @@ jobs:
           host: github.com
           private-key: ${{ secrets.SSH_GITHUB_PPK }}
           private-key-name: github-ppk
+
+      - name: Submodules
+        run: sh ./install.sh submodules
       - name: Build and push
         uses: docker/build-push-action@v6
         with:

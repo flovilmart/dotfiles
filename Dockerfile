@@ -9,7 +9,6 @@ WORKDIR /root/src/flovilmart/dotfiles
 
 COPY . .
 
-RUN --mount=type=ssh ./install.sh submodules
 RUN ./install.sh dotfiles
 RUN ./install.sh nushell
 RUN ./install.sh fix_tmux_nu_path
