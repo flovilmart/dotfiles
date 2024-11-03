@@ -7,7 +7,6 @@ all() {
   dotfiles
   vim
   tmux_plugins
-  prezto
 }
 
 dotfiles() {
@@ -70,10 +69,6 @@ tmux_plugins() {
   submodules
 	mkdir -p ${HOME}/.tmux/plugins
 	ln -sfn $(pwd)/tpm ${HOME}/.tmux/plugins
-}
-
-prezto() {
-	ln -sfn $(pwd)/.zprezto ${HOME}
 }
 
 jira() {
