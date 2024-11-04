@@ -1,3 +1,5 @@
+#!/bin/bash
+
 set -ex
 all() {
   brew
@@ -7,7 +9,6 @@ all() {
   dotfiles
   vim
   tmux_plugins
-  prezto
 }
 
 dotfiles() {
@@ -20,10 +21,27 @@ dotfiles() {
 	ln -sfn $(pwd)/kitty.conf ${HOME}/.config/kitty
 }
 
+fix_nu_path() {
+  NU_INSTALL_PATH=$(which nu)
+  if [ -z "${NU_INSTALL_PATH}" ]; then
+    echo "Nu not found in path. Please install Nu and try again"
+    exit 1
+  fi
+  if [ "${NU_INSTALL_PATH}" == "/opt/homebrew/bin/nu" ]; then
+    echo "nothing to do..."
+  else
+    sed -i "s#/opt/homebrew/bin/nu#${NU_INSTALL_PATH}#" ./.tmux.conf
+    sed -i "s#/opt/homebrew/bin/nu#${NU_INSTALL_PATH}#" ./vimrc/plugin/after/styling.lua
+  fi
+}
 
 
 submodules() {
-	git submodule update --init --recursive
+  if [ -d .git ]; then
+    git submodule update --init --recursive
+  else
+    echo "Not a git repo... skipping submodules"
+  fi
 }
 
 brew() {
@@ -53,25 +71,18 @@ ruby() {
 }
 
 node() {
-  brew_bundle_lang
 	curl https://get.volta.sh | bash
 	~/.volta/bin/volta install node
 	~/.volta/bin/npm install -g typescript eslint prettier;
 }
 
 vim() {
-  submodules
-  cd $(pwd)/vimrc && ./install.sh all
+  cd $(pwd)/vimrc && sh ./install.sh all
 }
 
 tmux_plugins() {
-  submodules
 	mkdir -p ${HOME}/.tmux/plugins
 	ln -sfn $(pwd)/tpm ${HOME}/.tmux/plugins
-}
-
-prezto() {
-	ln -sfn $(pwd)/.zprezto ${HOME}
 }
 
 jira() {
@@ -82,21 +93,31 @@ nushell() {
   NU_CONFIG_DIR=$(nu -c '$nu.default-config-dir')
   NU_CONFIG=${NU_CONFIG_DIR}/config.nu
   NU_ENV=${NU_CONFIG_DIR}/env.nu
+  mkdir -p ${NU_CONFIG_DIR}
+  mkdir -p ${HOME}/.config
   touch ${HOME}/.config/nu.env.toml
 	ln -sfn $(pwd)/nushell/env.nu "${NU_ENV}"
 	ln -sfn $(pwd)/nushell/config.nu "${NU_CONFIG}"
 	ln -sfn $(pwd)/nushell/scripts "${NU_CONFIG_DIR}/scripts"
 }
 
+starship() {
+  ln -sfn $(pwd)/starship.toml ${HOME}/.config/starship.toml
+}
+
 alanuship() {
-	brew install alacritty nushell starship
+	which brew && brew install alacritty nushell starship
+  mkdir -p ${HOME}/.config
 	mkdir -p ${HOME}/.config/alacritty
-	ln -sfn $(pwd)/starship.toml ${HOME}/.config/starship.toml
 	ln -sfn $(pwd)/alacritty.yml ${HOME}/.config/alacritty/
 
+  starship
   # Copy the nushell config
   nushell
 }
 
-# Run the command passed in
-$1
+while (("$#")) ; do
+    echo "Running $1"
+    $1
+    shift
+done

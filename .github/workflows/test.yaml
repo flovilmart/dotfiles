@@ -1,13 +1,46 @@
 on: push
+env:
+  IMAGE_NAME: flovilmart/dev-env
 jobs:
-  build:
-    runs-on: macos-11
+  docker:
+    name: Docker build
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
     steps:
-      - uses: actions/checkout@v2
-      - name: Install
+      - uses: actions/checkout@v4
+      - name: Set up SSH
+        uses: MrSquaare/ssh-setup-action@2d028b70b5e397cf8314c6eaea229a6c3e34977a # v3.1.0
+        with:
+          host: github.com
+          private-key: ${{ secrets.SSH_GITHUB_PPK }}
+          private-key-name: github-ppk
+      - name: Submodules
+        run: sh ./install.sh submodules
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: 'arm64,arm'
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Setup vars
         run: |
-          rm /usr/local/bin/aws
-          rm /usr/local/bin/aws*
-          rm /usr/local/bin/go
-          rm /usr/local/bin/go*
-          ./install.sh all
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          [ "$VERSION" == "main" ] && VERSION=latest
+          echo VERSION=$VERSION >> "$GITHUB_ENV"
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          platforms: linux/amd64,linux/arm64,linux/arm64/v8
+          push: true
+          ssh: default
+          tags: |
+            ghcr.io/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
