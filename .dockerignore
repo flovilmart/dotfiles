@@ -1,3 +1,3 @@
+vimrc/temp_dirs
 # Ingore the TS parsers as they're compiled against the target
-vimrc/plugged/nvim-treesitter/parser
 vimrc/plugged

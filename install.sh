@@ -1,3 +1,5 @@
+#!/bin/bash
+
 set -ex
 all() {
   brew
@@ -114,9 +116,8 @@ alanuship() {
   nushell
 }
 
-# Check which function to invoke
-invoke=$1
-shift
-
-# Invoke the function and pass args
-$invoke $@
+while (("$#")) ; do
+    echo "Running $1"
+    $1
+    shift
+done

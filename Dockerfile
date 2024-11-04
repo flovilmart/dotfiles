@@ -9,11 +9,7 @@ WORKDIR /root/src/flovilmart/dotfiles
 
 COPY . .
 
-RUN ./install.sh dotfiles
-RUN ./install.sh nushell
-RUN ./install.sh fix_nu_path
-RUN ./install.sh tmux_plugins
-RUN ./install.sh starship
+RUN ./install.sh dotfiles nushell fix_nu_path tmux_plugins starship
 # Adds SSH keys to make sure we can clone submodules
 RUN --mount=type=ssh ./install.sh vim
 
