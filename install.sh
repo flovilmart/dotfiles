@@ -31,7 +31,6 @@ fix_nu_path() {
     echo "nothing to do..."
   else
     sed -i "s#/opt/homebrew/bin/nu#${NU_INSTALL_PATH}#" ./.tmux.conf
-    sed -i "s#/opt/homebrew/bin/nu#${NU_INSTALL_PATH}#" ./vimrc/plugin/after/styling.lua
   fi
 }
 
