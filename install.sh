@@ -19,6 +19,8 @@ dotfiles() {
 	done;
 	mkdir -p ${HOME}/.config/kitty;
 	ln -sfn $(pwd)/kitty.conf ${HOME}/.config/kitty
+	mkdir -p ${HOME}/.config/ghostty;
+	ln -sfn $(pwd)/ghostty/config ${HOME}/.config/ghostty/config
 }
 
 fix_nu_path() {
