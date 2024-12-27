@@ -60,9 +60,9 @@ $env.config = {
     {
       name: "fzf",
       modifier: control,
-      keycode: char_f,
+      keycode: char_o,
       mode: vi_insert,
-      event: { send: executehostcommand, cmd: "fzf" }
+      event: { send: executehostcommand, cmd: "cd (^find ./src -maxdepth 2 -type d | fzf --reverse); vi .;" }
     }, {
       name: "move_to_start",
       modifier: alt,
