@@ -27,7 +27,9 @@ $env.TRANSIENT_PROMPT_COMMAND = {
   starship_prompt true
 }
 
-$env.EDITOR = "vim"
+$env.EDITOR = "nvim"
+
+$env.NUPM_HOME = ($env.HOME | path join ".config" | path join "nupm")
 
 $env.PATH = ["/usr/bin", "/bin", "/usr/sbin", "/sbin"]
 $env.ANDROID_SDK_ROOK = $"($env.HOME)/Library/Android/sdk"
@@ -44,6 +46,7 @@ $env.PATH = ($env.PATH | prepend $"($env.HOME)/go/bin")
 $env.PATH = ($env.PATH | prepend $"($env.HOME)/.rd/bin")
 $env.PATH = ($env.PATH | prepend $"($env.HOME)/.volta/bin")
 $env.PATH = ($env.PATH | prepend $"/usr/local/opt/kubernetes-cli@1.22/bin")
+$env.PATH = ($env.PATH | prepend ($env.NUPM_HOME | path join "scripts"))
 
 if ('GITHUB_TOKEN' in $env) {
   $env.HOMEBREW_GITHUB_API_TOKEN = $env.GITHUB_TOKEN
@@ -65,6 +68,8 @@ if ('GITHUB_TOKEN' in $env) {
 # By default, <nushell-config-dir>/scripts is added
 $env.NU_LIB_DIRS = [
     ($nu.config-path | path dirname | path join 'scripts')
+    ($nu.config-path | path dirname | path join 'modules')
+    ($env.NUPM_HOME | path join "modules")
 ]
 
 # Directories to search for plugin binaries when calling register

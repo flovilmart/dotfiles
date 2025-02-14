@@ -4,3 +4,6 @@
 [submodule "tpm"]
 	path = tpm
 	url = https://github.com/tmux-plugins/tpm
+[submodule "nushell/plugins/nupm"]
+	path = nushell/plugins/nupm
+	url = https://github.com/nushell/nupm
