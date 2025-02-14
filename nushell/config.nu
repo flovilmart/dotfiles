@@ -7,16 +7,12 @@ def to_records [env_vars] {
   echo $env_vars | grep export | sed s/export//g | split row "\n" | each { |it| $it | str trim | split column "=" name value | first } | reduce -f {} { |it, acc| $acc | upsert $it.name $it.value }
 }
 
-def sonder_aws_config [dest] {
-  sonder config aws -a $dest | sed s/export//g | split row "\n" | each { |it| $it | str trim | split column "=" name value | first } | each { |it| { $it.name: $it.value }}
-}
-
 def eval [std_out] {
   to_records $std_out | load-env
 }
 
 def kswitch [dest] {
-  let envs = (sonder_aws_config $dest)
+  let envs = (sonder aws config $dest)
   let namespaces = [["env", "namespace"]; ["staging", "preview"] ["prod", "production"]]
 
   let ns = (echo $namespaces | where env == $dest | get namespace --ignore-errors)
@@ -58,12 +54,12 @@ $env.config = {
   edit_mode: "vi",
   keybindings: [
     {
-      name: "fzf",
-      modifier: control,
-      keycode: char_o,
-      mode: vi_insert,
-      event: { send: executehostcommand, cmd: "cd (^find ./src -maxdepth 2 -type d | fzf --reverse); vi .;" }
-    }, {
+    #  name: "fzf",
+    #  modifier: control,
+    #  keycode: char_o,
+    #  mode: vi_insert,
+    #  event: { send: executehostcommand, cmd: "cd (^find ./src -maxdepth 2 -type d | fzf --reverse); vi .;" }
+    #}, {
       name: "move_to_start",
       modifier: alt,
       keycode: char_b,
@@ -83,4 +79,60 @@ $env.config = {
       event: { edit: backspaceword }
     }
   ]
+}
+
+export def install_highlights [] {
+  let local = "vimrc/plugged/nvim-treesitter/queries/nu"
+  let remote = "https://raw.githubusercontent.com/nushell/tree-sitter-nu/main/queries/nu/"
+  let files = ["highlights.scm" "indents.scm" "injections.scm" "textobjects.scm"]
+
+  mkdir $local
+
+  $files | par-each {|file| http get ([$remote $file] | str join "/") | save --force ($local | path join $file) }
+}
+
+
+export def "sonder codeartifact_auth_token" [] {
+  aws --profile sonder-dev/codeartifact-readonly codeartifact get-authorization-token --domain sonder-prod --domain-owner 111664848662 --region us-east-1 --query authorizationToken --output text
+}
+
+export def "sonder relogin" [] {
+  sonder aws signout
+  sonder setup
+  sonder rewrap
+}
+
+export def "sonder rewrap" [] {
+  warp-cli disconnect
+  warp-cli connect
+}
+
+export def --env "sonder auth codeartifact" [profile?: string] {
+  {CODEARTIFACT_AUTH_TOKEN: (sonder codeartifact_auth_token)} | load-env
+}
+
+export def --env "sonder config aws" [profile?: string] {
+  try {
+    ^sonder ...([config aws $profile] | compact)
+        | lines
+        | where $it =~ export | parse "export {key}={value}" | transpose -d -i -r | load-env
+  }
+}
+
+export def "sonder proxy db" [] {
+  let DB_HOST = "shared-aurora-pg-staging.cluster-c0kopnruetbd.us-east-1.rds.amazonaws.com"
+  let USER_SOCAT = $"($env.USER)-socat"
+  kubectl run $USER_SOCAT --image=marcnuri/port-forward --env=$"REMOTE_HOST=($DB_HOST)" --env="REMOTE_PORT=5432" --env="LOCAL_PORT=5433" ;
+  kubectl wait --for=condition=ready --timeout=60s pod $USER_SOCAT;
+  kubectl port-forward --pod-running-timeout=10s $USER_SOCAT 5433:5433;
+  kubectl delete pod $USER_SOCAT;
+}
+
+export def "sonder --help" [] {
+  ^sonder --help
+
+  print "sonder relogin"
+  print "sonder rewrap"
+  print "sonder proxy db"
+  print "sonder auth"
 }
