@@ -101,6 +101,7 @@ nushell() {
 	ln -sfn $(pwd)/nushell/env.nu "${NU_ENV}"
 	ln -sfn $(pwd)/nushell/config.nu "${NU_CONFIG}"
 	ln -sfn $(pwd)/nushell/scripts "${NU_CONFIG_DIR}/scripts"
+	ln -sfn $(pwd)/nushell/modules "${NU_CONFIG_DIR}/modules"
 }
 
 starship() {
