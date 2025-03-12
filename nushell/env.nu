@@ -28,25 +28,36 @@ $env.TRANSIENT_PROMPT_COMMAND = {
 }
 
 $env.EDITOR = "nvim"
+$env.ANDROID_SDK_ROOK = $"($env.HOME)/Library/Android/sdk"
 
 $env.NUPM_HOME = ($env.HOME | path join ".config" | path join "nupm")
 
-$env.PATH = ["/usr/bin", "/bin", "/usr/sbin", "/sbin"]
-$env.ANDROID_SDK_ROOK = $"($env.HOME)/Library/Android/sdk"
-$env.PATH = ($env.PATH | prepend $"$($env.ANDROID_SDK_ROOK)/emulator")
-$env.PATH = ($env.PATH | prepend $"$($env.ANDROID_SDK_ROOK)/platform_tools")
-
-$env.PATH = ($env.PATH | prepend '/usr/local/bin')
-$env.PATH = ($env.PATH | prepend '/opt/homebrew/bin')
-
-$env.PATH = ($env.PATH | prepend $"($env.HOME)/.rbenv/shims")
-$env.PATH = ($env.PATH | prepend $"($env.HOME)/.cargo/bin")
-$env.PATH = ($env.PATH | prepend $"($env.HOME)/.krew/bin")
-$env.PATH = ($env.PATH | prepend $"($env.HOME)/go/bin")
-$env.PATH = ($env.PATH | prepend $"($env.HOME)/.rd/bin")
-$env.PATH = ($env.PATH | prepend $"($env.HOME)/.volta/bin")
-$env.PATH = ($env.PATH | prepend $"/usr/local/opt/kubernetes-cli@1.22/bin")
-$env.PATH = ($env.PATH | prepend ($env.NUPM_HOME | path join "scripts"))
+$env.PATH = (
+    [
+        ($env.NUPM_HOME | path join "scripts"),
+        "/usr/local/opt/kubernetes-cli@1.22/bin",
+        ($env.HOME | path join ".volta" "bin"),
+        ($env.HOME | path join ".rd" "bin"),
+        ($env.HOME | path join "go" "bin"),
+        ($env.HOME | path join ".krew" "bin"),
+        ($env.HOME | path join ".cargo" "bin"),
+        ($env.HOME | path join ".rbenv" "shims"),
+        '/opt/homebrew/bin',
+        '/usr/local/bin',
+        (
+            $env.ANDROID_SDK_ROOK
+            | path join "platform_tools"
+        ),
+        (
+            $env.ANDROID_SDK_ROOK
+            | path join "emulator"
+        ),
+        "/usr/bin",
+        "/bin",
+        "/usr/sbin",
+        "/sbin",
+    ]
+)
 
 if ('GITHUB_TOKEN' in $env) {
   $env.HOMEBREW_GITHUB_API_TOKEN = $env.GITHUB_TOKEN
@@ -79,5 +90,3 @@ $env.NU_PLUGIN_DIRS = [
     ($nu.config-path | path dirname | path join 'plugins')
 ]
 
-# Load the JWT Utils in the main shell
-use jwt_utils.nu *
