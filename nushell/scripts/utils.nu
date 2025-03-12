@@ -4,3 +4,16 @@ export def default_value [value, default] {
   }
   return $value
 }
+
+# Returns a record which contains only the columns matching the passed parameters
+# The condition can be a string or a block
+export def "columns match" [condition] {
+  mut block: closure = {||}
+  if (($condition | describe) == "string") {
+    $block = { |it| $it.key =~ $condition }
+  } else {
+    $block = $condition
+  }
+  let real_block = $block
+  $in | transpose key value | where { |it| do $block $it } | transpose --header-row | first
+}
