@@ -24,6 +24,10 @@ def get_model [] {
   return $config.default_model
 }
 
+def debug-is-on [] {
+  "MISTRAL_DEBUG" in $env
+}
+
 def get_api_version [] {
   if ("MISTRAL_API_VERSION" in $env) {
     return $env.MISTRAL_API_VERSION
@@ -83,7 +87,7 @@ export def generate_content [input, generation_config = {}, history = []] {
   $body.messages = $body.messages | append ($input | as_message)
 
   let final_body = $body
-  if ("MISTRAL_DEBUG" in $env) {
+  if (debug-is-on) {
     print ($final_body | to json -r)
   }
   retry { http post --content-type "application/json" --allow-errors --headers ["Authorization", $"Bearer ($env.MISTRAL_API_KEY)"] $url $final_body }
@@ -140,7 +144,7 @@ export def --env chat [initial_prompt, generation_config = {}, history = []] {
   # Check if we have a prompt, if not, ask for one
   if ($text | is-empty) {
     # TODO: Listen for up / down keys to cycle through previous queries
-    $text = input $"(get_prompt)"
+    $text = (input $"(get_prompt)" | str trim)
   } else if ($text | is-string) {
     print (get_prompt $text)
   }
@@ -154,6 +158,11 @@ export def --env chat [initial_prompt, generation_config = {}, history = []] {
     }
     '\debug' => {
       $env.MISTRAL_DEBUG = "true"
+    }
+    '\debug off' => {
+      if (debug-is-on) {
+        hide-env MISTRAL_DEBUG
+      }
     }
     '\reset' => {
       $history = []
@@ -183,7 +192,7 @@ export def --env chat [initial_prompt, generation_config = {}, history = []] {
       # Append the previous call in the history
       $history = $history | append ($text | as_message)
 
-      if ("MISTRAL_DEBUG" in $env) {
+      if (debug-is-on) {
         print ($response | to json -r)
       }
 
@@ -221,7 +230,7 @@ export def --env chat [initial_prompt, generation_config = {}, history = []] {
 export def --env main [prompt: string = "", generation_config = {}] {
   mut history = []
   let input = $in
-  if (($input | is-not-empty) and ("session" in $input)) {
+  if (($input | is-not-empty) and "session" in $input) {
     $history = $input | get session
   }
   chat $prompt $generation_config $history
