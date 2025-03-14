@@ -77,12 +77,46 @@ def as_message [] {
   }
 }
 
+def fs_functions [] {
+  return [
+    { type: "function",
+      function: {
+        name: "fs_write",
+        description: "write the content to the path in the file system",
+        parameters: {
+          type: "object",
+          properties: {
+            "path": { type: "string", description: "the path to write the contents" },
+            "contents": { type: "string", description: "the content to write" }
+          }
+        }
+      }
+    },
+    { type: "function",
+      function: {
+        name: "fs_read",
+        description: "read the content to the path in the file system",
+        parameters: {
+          type: "object",
+          properties: {
+            "path": { type: "string", description: "the path to read the contents from" },
+          }
+        }
+      }
+    },
+  ]
+}
+
+def asana_tools [] {
+  (asana ai function declarations | each { |item| { "type": "function", "function": $item } })
+}
+
 export def generate_content [input, generation_config = {}, history = []] {
   let url = $"https://api.mistral.ai/(get_api_version)/chat/completions"
   mut body = {
     model: (get_model)
     "messages": []
-    tools: (asana ai function declarations | each { |item| { "type": "function", "function": $item } })
+    tools: (asana_tools | append (fs_functions))
   }
   $body.messages = build_history $history
 
@@ -114,6 +148,12 @@ def exec_function_call [tool_call] {
       }
       "asana_api_put" => {
         return (asana api put $args.url ($args.body | from json))
+      }
+      "fs_write" => {
+        return ($args.contents | save $args.path)
+      }
+      "fs_read" => {
+        return (open -r $args.path)
       }
     }
   } catch {
@@ -220,7 +260,7 @@ export def --env chat [initial_prompt, generation_config = {}, history = []] {
           }
         }
       } else {
-        print $response | to json -r
+        print ($response | to json -r)
       }
     }
   }
