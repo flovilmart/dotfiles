@@ -101,3 +101,4 @@ use utils.nu *
 # Modules
 use asana.nu
 use gemini.nu
+use mistral.nu

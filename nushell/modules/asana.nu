@@ -82,16 +82,31 @@ def headers [] {
 
 export module api {
   export def get [url: string] {
-    let res = (http get -H (headers) $url)
-
-    if ($res.data | is-empty) {
-      {}
+    mut url = $url
+    if ($url | str starts-with "http") {
+      $url
     } else {
+      $url = $"https://app.asana.com/api/1.0/($url)"
+    }
+    let res = (http get --allow-errors -H (headers) $url)
+    if ("errors" in $res) {
+      print $res.errors
+    }
+
+    if ("data" in $res) {
       $res.data
+    } else {
+      $res
     }
   }
 
   export def post [url: string, body: record] {
+    mut url = $url
+    if ($url | str starts-with "http") {
+      $url
+    } else {
+      $url = $"https://app.asana.com/api/1.0/($url)"
+    }
     if (config read debug | is-not-empty) {
       print $"POST: ($url)"
       print $"BODY: ($body | to json)"
@@ -99,14 +114,132 @@ export module api {
     let res = (http post -H (headers) --allow-errors --content-type "application/json" $url $body)
     if ("errors" in $res) {
       print $res.errors
-      error make --unspanned { msg: $res.errors }
     }
-    if ($res.data | is-empty) {
-      {}
-    } else {
+    if ("data" in $res) {
       $res.data
+    } else {
+      $res
     }
   }
+
+  export def put [url: string, body: record] {
+    mut url = $url
+    if ($url | str starts-with "http") {
+      $url
+    } else {
+      $url = $"https://app.asana.com/api/1.0/($url)"
+    }
+    if (config read debug | is-not-empty) {
+      print $"POST: ($url)"
+      print $"BODY: ($body | to json)"
+    }
+    let res = (http put -H (headers) --allow-errors --content-type "application/json" $url $body)
+    if ("errors" in $res) {
+      print $res.errors
+    }
+    if ("data" in $res) {
+      $res.data
+    } else {
+      $res
+    }
+  }
+}
+
+export def "ai function declarations" [] {
+  return [
+    {
+      name: "asana_api_get"
+      description: "
+makes a get api call on the asana API.
+
+Notable APIs:
+
+When needing to pass a workspace ID add it to the url query parameters in the form workspace=ASANA_WORKSPACE_ID
+When needing to pass assignee, always use the global id (GID) of the user unless specified othewise.
+
+GET time period: https://app.asana.com/api/1.0/time_periods
+Searching for tasks: https://app.asana.com/api/1.0/workspaces/ASANA_WORKSPACE_ID/tasks/search
+
+GET user: https://app.asana.com/api/1.0/users/USER_GID (USER_GID is the user's global id)
+GET the current user: https://app.asana.com/api/1.0/users/me
+"
+      parameters: {
+        type: "object"
+        properties: {
+          "url": {
+            "type": "string"
+            "description": "The URL to make the get request to"
+          }
+        }
+      }
+    }
+    {
+      name: "asana_api_post",
+      description: "
+makes a post api call on the asana API
+
+Notable APIs:
+
+Create task: https://app.asana.com/api/1.0/tasks
+Create goal: https://app.asana.com/api/1.0/goals
+"
+      parameters: {
+        type: "object"
+        properties: {
+          "url": {
+            "type": "string",
+            "description": "The URL to make the post request to"
+          }
+          "body": {
+            "type": "string",
+            "description": "The body of the post request in a JSON stringified format. All asana API request have a top level data key."
+          }
+        }
+      }
+    },
+    {
+      name: "asana_api_put"
+      description: "
+makes a PUT api call on the asana API.
+
+This is use to update a resource.
+
+Notable APIs:
+
+Update task: https://app.asana.com/api/1.0/tasks/RESOURCE_ID
+Update goal: https://app.asana.com/api/1.0/goals/RESOURCE_ID
+"
+      parameters: {
+        type: "object"
+        properties: {
+          "url": {
+            "type": "string",
+            "description": "The URL to make the post request to"
+          },
+          "body": {
+            "type": "string",
+            "description": "The body of the post request in a JSON stringified format. All asana API request have a top level data key."
+          }
+        }
+      }
+    } {
+      name: "asana_typeahead"
+      description: "Allows to find user, project, tasks etc... by their name",
+      parameters: {
+        type: "object",
+        properties: {
+          "type": {
+            "type": "string",
+            "description": "The type of resource to search for"
+          },
+          "query": {
+            "type": "string",
+            "description": "The query to search for"
+          }
+        }
+      }
+    }
+  ]
 }
 
 use api
@@ -146,7 +279,6 @@ export module project {
 
 export module goal {
   export def create [body: record] {
-
     let url = $"https://app.asana.com/api/1.0/goals"
     api post $url $body
   }

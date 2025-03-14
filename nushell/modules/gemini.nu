@@ -47,24 +47,63 @@ def retry [block: closure, max = 5] {
   }
 }
 
-export def generate_content [str: string, system_instruction: string = "", generation_config = {}, state = []] {
+def build_history [state = []] {
+  $state | each { |item|
+    if ("text" in $item) {
+      return (content_block "user" $item.text)
+    }
+    [(content_block "user" $item.text),
+    $item.response.candidates.0.content]
+  } | flatten
+}
+
+export def generate_content [input, system_instruction: string = "", generation_config = {}, history = []] {
   let url = $"https://generativelanguage.googleapis.com/(get_api_version)/models/(get_model):generateContent?key=($env.GEMINI_API_KEY)"
   mut body = {
     "contents": []
     generationConfig: $generation_config
+    tools: [
+      { "function_declarations": (asana ai function declarations) }
+    ]
   }
   if ($system_instruction | is-not-empty) {
     $body.system_instruction = { "parts": { "text": $system_instruction } }
   }
-  $body.contents = $state | each { |item|
-    # Add back the request, as well as the associated response
-    [(content_block "user" $item.text),
-    $item.response.candidates.0.content]
-  } | flatten
+  $body.contents = $history
 
-  $body.contents = $body.contents | append (content_block "user" $str)
+  if (($input | describe) =~ "string") {
+    $body.contents = $body.contents | append (content_block "user" $input)
+  } else {
+    $body.contents = $body.contents | append $input
+  }
+
   let final_body = $body
   retry { http post --content-type "application/json" $url $final_body }
+}
+
+export def add_function_response [response, system_instruction: string = "", state = []] {
+  let url = $"https://generativelanguage.googleapis.com/(get_api_version)/models/(get_model):generateContent?key=($env.GEMINI_API_KEY)"
+  mut body = {
+    "contents": []
+    tools: [
+      { "function_declarations": (asana ai function declarations) }
+    ]
+  }
+  if ($system_instruction | is-not-empty) {
+    $body.system_instruction = { "parts": { "text": $system_instruction } }
+  }
+  $body.contents = build_history $state
+
+  $body.contents = $body.contents | append {
+    "role": "user",
+    "parts": [
+      {
+        "functionResponse": $response
+      }
+    ]
+  }
+  let final_body = $body
+  retry { http post -e --content-type "application/json" $url $final_body }
 }
 
 export def interactive_prompt [base = "Gemini> ", responses = []] {
@@ -127,11 +166,27 @@ export def interactive_prompt [base = "Gemini> ", responses = []] {
   return $buf
 }
 
-export def --env chat [--system-instruction (-i): string = "", initial_prompt = "", generation_config = {}, responses = []] {
+def exec_function_call [function_call] {
+  let name = ($function_call | get name)
+  let args = ($function_call | get args)
+  match $name {
+    "asana_typeahead" => {
+      let res = (asana typeahead $args.type $args.query)
+      return { name: $name, response: { name: $name, content: $res } }
+    },
+    "asana_api_post" => {
+      let res = (asana api post $args.url ($args.body | from json))
+      return { name: $name, response: { name: $name, content: $res } }
+    }
+  }
+}
+
+export def --env chat [--system-instruction (-i): string = "", initial_prompt, generation_config = {}, history = []] {
   mut system_instruction = $system_instruction
-  mut responses = $responses
+  mut history: any = $history
   mut text = $initial_prompt
 
+  mut next_call: any = null
   # System instructions may be passed in directly or throught he flag"
   let in_instructions = $in
   if ($in_instructions | is-not-empty) {
@@ -140,14 +195,16 @@ export def --env chat [--system-instruction (-i): string = "", initial_prompt = 
 
   let state = {
     system_instruction: $system_instruction
-    session: $responses
+    session: $history
   }
   # Check if we have a prompt, if not, ask for one
   if ($text | is-empty) {
     # TODO: Listen for up / down keys to cycle through previous queries
     $text = input $"(get_prompt)"
-  } else {
+  } else if (($text | describe) == "string") {
     print (get_prompt $text)
+  } else {
+    print "Prompt is an object..."
   }
   match $text {
     '\dump' => {
@@ -157,6 +214,27 @@ export def --env chat [--system-instruction (-i): string = "", initial_prompt = 
     '\exit' => {
       return $state
     }
+    '\execute' => {
+      # let response = $responses | last | get response
+      # let call_res = (exec_function_call ($response | get candidates.0.content.parts.0.functionCall))
+      # let input = {
+      #   "role": "user",
+      #   "parts": [
+      #     {
+      #       "text": $response | get candidates.0.content.parts.0.functionCall
+      #     }
+      #   ]
+      # }
+
+      # let func_res = (generate_content $input $system_instruction $responses)
+      # $responses = $responses | append { "response": $func_res }
+      # print ($response | get candidates.0.content.parts)
+
+      # if "functionCall" in ($response | get candidates.0.content.parts.0) {
+      #   $next_call = '\execute'
+      # }
+      # print $func_res
+    },
     $val if ($val | str starts-with '\save') => {
       mut param_list = $val | split row '\save' | each { str trim } | filter { is-not-empty }
       mut file_name = ""
@@ -177,15 +255,30 @@ export def --env chat [--system-instruction (-i): string = "", initial_prompt = 
     }
     _ => {
       print -rn $"- running...."
-      let response = (generate_content $text $system_instruction $generation_config $responses)
-      $responses = $responses | append { "text": $text, "response": $response }
+      $history = $history | append (content_block "user" $text)
+      let response = (generate_content $text $system_instruction $generation_config $history)
+      let content = $response | get candidates.0.content
+      $history = $history | append $content
       print -rn $"\r"
-      print ($response | get candidates.0.content.parts)
+      print ($content | get parts)
+
+      let function_call = ($content | get parts?.0?.functionCall?)
+      if ($function_call | is-not-empty) {
+        let call_res = (exec_function_call $function_call)
+        $next_call = {
+          "role": "user",
+          "parts": [
+            {
+              "functionResponse": $call_res
+            }
+          ]
+        }
+      }
     }
   }
 
   # loop back in!
-  chat --system-instruction $system_instruction "" $generation_config $responses
+  chat --system-instruction $system_instruction $next_call $generation_config $history
 }
 
 export def --env main [--system-instruction (-i): string = "", prompt: string = "", generation_config = {}] {
