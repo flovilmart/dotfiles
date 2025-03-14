@@ -1,3 +1,5 @@
+use asana.nu
+
 const config = { default_model: "mistral-large-latest", api_version: "v1" }
 
 const models = [
