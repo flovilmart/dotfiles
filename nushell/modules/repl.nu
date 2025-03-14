@@ -1,7 +1,8 @@
-def interactive_prompt [base = "", history = []] {
+export def interactive_prompt [base = "> ", history = []] {
   mut buf = ""
-  mut res_idx = ($history | length) - 1
+  mut res_idx = -1
   mut is_previous = false
+
   def render [buf: string] {
     print -rn $"\r($base)($buf)"
   }
@@ -14,33 +15,32 @@ def interactive_prompt [base = "", history = []] {
   render ""
   loop {
     let res = (input listen --types [key])
-    if ($res.code == "up") {
+    if ($res.code == "enter") {
+      return $buf
+    }
+    # TODO: Pattern matching rewrite
+    if ($res.code == "c") and ($res.modifiers == ["keymodifiers(control)"]) {
       clear_line $buf
-      # TODO: When looping - make sure we get the last line as well is there was one!
-      if $res_idx < ($history | length) and $res_idx >= 0 {
-        $buf = $history | get $res_idx
+      $buf = ""
+      error make {
+        msg: "SIGINT"
+      }
+    } else if ($res.code == "up") {
+      clear_line $buf
+      if ($res_idx <= 0) {
+        $res_idx = ($history | length)
       }
       $res_idx = ($res_idx - 1)
-      # loop
-      if ($res_idx < 0) {
-        $res_idx = ($history | length) - 1
-      }
+      $buf = $history | get $res_idx
       $is_previous = true
     } else if ($res.code == "down") {
       clear_line $buf
-      # TODO: When looping - make sure we get the last line as well is there was one!
-      if $res_idx < ($history | length) and $res_idx >= 0 {
-        $buf = $history | get $res_idx
+      if ($res_idx >= ($history | length) - 1) {
+        $res_idx = -1
       }
       $res_idx = ($res_idx + 1)
-      # loop
-      if ($res_idx >= ($history | length)) {
-        $res_idx = 0
-      }
+      $buf = $history | get $res_idx
       $is_previous = true
-    } else if ($res.code == "enter") {
-      print "enter"
-      break
     } else if ($res.code == "backspace") {
       $buf = ($buf | str substring 0..-2)
     } else if ($res.key_type == "char" and $res.modifiers == []) {
@@ -55,5 +55,4 @@ def interactive_prompt [base = "", history = []] {
     }
     render $buf
   }
-  return $buf
 }
