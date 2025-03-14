@@ -1,6 +1,6 @@
 use asana.nu
 
-const config = { default_model: "mistral-large-latest", api_version: "v1" }
+const config = { default_model: "mistral-small-latest", api_version: "v1" }
 
 const models = [
   "mistral-large-latest"
@@ -206,6 +206,14 @@ export def --env chat [initial_prompt, generation_config = {}, history = []] {
         hide-env MISTRAL_DEBUG
       }
     }
+    '\usage' => {
+      $env.MISTRAL_PRINT_USAGE = "true"
+    }
+    '\usage off' => {
+      if ("MISTRAL_PRINT_USAGE" in $env) {
+        hide-env MISTRAL_PRINT_USAGE
+      }
+    }
     '\reset' => {
       $history = []
     }
@@ -243,6 +251,9 @@ export def --env chat [initial_prompt, generation_config = {}, history = []] {
         $history = $history | append $message
         print -rn $"\r"
         print ($message | get content)
+        if ("MISTRAL_PRINT_USAGE" in $env) {
+          print ($response | get usage)
+        }
 
         if ("tool_calls" in $message) {
           # here we just get the 1st tool call.
