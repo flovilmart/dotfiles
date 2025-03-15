@@ -218,7 +218,29 @@ def param-from-command [val, command] {
   $val | split row $command | each { str trim } | filter { is-not-empty }
 }
 
+def --env init_session [] {
+  mkdir ~/.mistral/sessions
+  if not ("MISTRAL_SESSION_ID" in $env) {
+    $env.MISTRAL_SESSION_ID = (^date +%s)
+  }
+  $env.MISTRAL_SESSION_PATH = $"~/.mistral/sessions/($env.MISTRAL_SESSION_ID).json"
+}
+
+def append_session [entry] {
+  (($entry | to json -r) + "\n") | save -a $env.MISTRAL_SESSION_PATH
+}
+
+def history_from_stream [] {
+  let input = $in
+  if (($input | describe) == "byte stream") {
+    $input | lines | each { |line| $line | from json }
+  } else {
+    []
+  }
+}
+
 export def --env chat [initial_prompt, generation_config = {}, history = []] {
+  init_session
   mut history: any = $history
   mut text = $initial_prompt
 
@@ -260,9 +282,24 @@ export def --env chat [initial_prompt, generation_config = {}, history = []] {
     }
     '\reset' => {
       $history = []
+      if ("MISTRAL_SESSION_ID" in $env) {
+        hide-env MISTRAL_SESSION_ID
+      }
+      if ("MISTRAL_SESSION_PATH" in $env) {
+        hide-env MISTRAL_SESSION_PATH
+      }
     }
     '\model' => {
       set_model ($models | input list)
+    }
+    '\session_info' => {
+      # ensure a session exists before starting a new one
+      init_session
+      print { path: $env.MISTRAL_SESSION_PATH, id: $env.MISTRAL_SESSION_ID }
+    }
+    '\restore' => {
+      let source = (ls ~/.mistral/sessions | input list | get name)
+      $history = (open -r $source | history_from_stream)
     }
     # TODO: only run if this is a string before checking
     $val if ($val | is-command '\save') => {
@@ -282,9 +319,12 @@ export def --env chat [initial_prompt, generation_config = {}, history = []] {
     }
     _ => {
       print -rn $"- running...."
+      let input_message = $text | as_message
+      append_session $input_message
+
       let response = (generate_content $text $generation_config $history)
       # Append the previous call in the history
-      $history = $history | append ($text | as_message)
+      $history = $history | append $input_message
 
       if (debug-is-on) {
         print ($response | to json -r)
@@ -293,6 +333,8 @@ export def --env chat [initial_prompt, generation_config = {}, history = []] {
       if ("choices" in $response) {
         let message = $response | get choices.0.message
         $history = $history | append $message
+        append_session $message
+
         print -rn $"\r"
         print ($message | get content)
         if ("MISTRAL_PRINT_USAGE" in $env) {
@@ -327,8 +369,8 @@ export def --env chat [initial_prompt, generation_config = {}, history = []] {
 export def --env main [prompt: string = "", generation_config = {}] {
   mut history = []
   let input = $in
-  if (($input | is-not-empty) and "session" in $input) {
-    $history = $input | get session
+  if (($input | describe) == "byte stream") {
+    $history = $input | history_from_stream
   }
   chat $prompt $generation_config $history
 }
