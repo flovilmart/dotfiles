@@ -110,6 +110,18 @@ def fs_functions [] {
         }
       }
     },
+    { type: "function",
+      function: {
+        name: "fs_ls",
+        description: "list the content of the provided directory at the path. This works only for directories. To read the content of a file, use fs_read",
+        parameters: {
+          type: "object",
+          properties: {
+            "path": { type: "string", description: "the path to list the files from" },
+          }
+        }
+      }
+    },
   ]
 }
 
@@ -140,7 +152,7 @@ export def generate_content [input, generation_config = {}, history = []] {
 }
 
 def confirm [msg: string] {
-  let res = (input $"(ansi yellow)($msg)(ansi reset) (y/n)")
+  let res = (input $"(ansi yellow)($msg)(ansi reset) \(y/n\) ")
   return ($res | str starts-with "y")
 }
 
@@ -182,6 +194,9 @@ def exec_function_call [tool_call] {
       }
       "fs_read" => {
         return (open -r $args.path)
+      }
+      "fs_ls" => {
+        return (ls $args.path)
       }
     }
   } catch {
