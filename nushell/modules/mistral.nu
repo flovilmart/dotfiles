@@ -122,6 +122,18 @@ def fs_functions [] {
         }
       }
     },
+    { type: "function",
+      function: {
+        name: "exec",
+        description: "execute an arbitrary command in the current directory. Retuns the stdout, stderr and exit_code of the command",
+        parameters: {
+          type: "object",
+          properties: {
+            "command": { type: "string", description: "the command to execute" },
+          }
+        }
+      }
+    },
   ]
 }
 
@@ -134,12 +146,18 @@ def headers [] {
 }
 
 export def generate_content [input, generation_config = {}, history = []] {
-  let url = $"https://api.mistral.ai/(get_api_version)/chat/completions"
   mut body = {
-    model: (get_model)
     "messages": []
     tools: (asana_tools | append (fs_functions))
   }
+  mut api = "chat"
+  if ("MISTRAL_AGENT" in $env) {
+    $body.agent_id = $env.MISTRAL_AGENT
+    $api = "agents"
+  } else {
+    $body.model = (get_model)
+  }
+  let url = $"https://api.mistral.ai/(get_api_version)/($api)/completions"
   $body.messages = build_history $history
 
   $body.messages = $body.messages | append ($input | as_message)
@@ -148,7 +166,9 @@ export def generate_content [input, generation_config = {}, history = []] {
   if (debug-is-on) {
     print ($final_body | to json -r)
   }
-  retry { http post -t application/json -e -H (headers) $url $final_body }
+  try {
+    http post -t application/json -e -H (headers) $url $final_body
+  } catch { |err| $err.msg }
 }
 
 def confirm [msg: string] {
@@ -197,6 +217,11 @@ def exec_function_call [tool_call] {
       }
       "fs_ls" => {
         return (ls $args.path)
+      }
+      "exec" => {
+        # Here we use complete to get stdout & stderr and exit code:
+        # https://www.nushell.sh/book/stdout_stderr_exit_codes.html#stderr
+        return (nu -c $args.command | complete)
       }
     }
   } catch {
