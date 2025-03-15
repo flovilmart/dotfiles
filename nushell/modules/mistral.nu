@@ -2,10 +2,12 @@ use asana.nu
 
 const config = { default_model: "mistral-small-latest", api_version: "v1" }
 
+# Pricing: https://mistral.ai/products/la-plateforme#pricing
 const models = [
-  "mistral-large-latest"
+  "mistral-small-latest" # not expensive
+  "codestral-latest" # not very expensive
+  "mistral-large-latest" # very expensive!
   "pixtral-large-latest"
-  "mistral-small-latest"
   "mistral-saba-latest"
   "mistral-8b-latest"
   "mistral-3b-latest"
@@ -13,6 +15,10 @@ const models = [
   "mistral-moderation-latest"
   "mistral-ocr-latest"
 ]
+
+export def get_models [] {
+  http get --headers (headers) "https://api.mistral.ai/v1/models"
+}
 
 const max_retry = 0
 export def --env set_model [model: string] {
@@ -111,6 +117,10 @@ def asana_tools [] {
   (asana ai function declarations | each { |item| { "type": "function", "function": $item } })
 }
 
+def headers [] {
+  ["Authorization", $"Bearer ($env.MISTRAL_API_KEY)"]
+}
+
 export def generate_content [input, generation_config = {}, history = []] {
   let url = $"https://api.mistral.ai/(get_api_version)/chat/completions"
   mut body = {
@@ -126,7 +136,7 @@ export def generate_content [input, generation_config = {}, history = []] {
   if (debug-is-on) {
     print ($final_body | to json -r)
   }
-  retry { http post --content-type "application/json" --allow-errors --headers ["Authorization", $"Bearer ($env.MISTRAL_API_KEY)"] $url $final_body }
+  retry { http post -t application/json -e -H (headers) $url $final_body }
 }
 
 def exec_function_call [tool_call] {
@@ -150,7 +160,21 @@ def exec_function_call [tool_call] {
         return (asana api put $args.url ($args.body | from json))
       }
       "fs_write" => {
-        return ($args.contents | save $args.path)
+        let dir = ($args.path | path dirname)
+        if not ($dir | path exists) {
+          print $"Creating directory ($dir)"
+          mkdir $dir
+        }
+        try {
+          return ($args.contents | save $args.path)
+        } catch {
+          |err| print $"Error writing to file: ($err.msg)"
+          let force = (input "Do you want to ? (y/n)")
+          if ($force | str starts-with "y") {
+            return ($args.contents | save -f $args.path)
+          }
+          return $err
+        }
       }
       "fs_read" => {
         return (open -r $args.path)
@@ -158,6 +182,7 @@ def exec_function_call [tool_call] {
     }
   } catch {
     |err| print $"Error running function: ($err.msg)"
+    return $err
   }
 }
 
