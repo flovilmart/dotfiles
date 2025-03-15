@@ -32,6 +32,38 @@ def get_model [] {
   return $config.default_model
 }
 
+def get_agent [] {
+  if ("MISTRAL_AGENT" in $env) {
+    return $env.MISTRAL_AGENT
+  }
+  null
+}
+
+def get_agents [] {
+  if ("MISTRAL_AGENTS" in $env) {
+    return $env.MISTRAL_AGENTS
+  }
+  []
+}
+
+def --env set_agent [agent: string] {
+  if ($agent | is-empty) or ($agent == "no agent") {
+    if ("MISTRAL_AGENT" in $env) {
+      hide-env MISTRAL_AGENT
+    }
+  } else {
+    $env.MISTRAL_AGENT = $agent
+  }
+}
+
+def get_current_runtime [] {
+  let agent = (get_agent)
+  if ($agent | is-not-empty) {
+    return $"ag:($agent | split row ":" | get 3)"
+  }
+  return (get_model)
+}
+
 def debug-is-on [] {
   "MISTRAL_DEBUG" in $env
 }
@@ -51,7 +83,7 @@ def content_block [source: string, str: string] {
 }
 
 def get_prompt [prompt: string = ""] {
-  $"(ansi rb)Mistral (ansi green)\((get_model)\)(ansi reset)(ansi blue)> (ansi reset)($prompt)"
+  $"(ansi rb)Mistral (ansi green)\((get_current_runtime)\)(ansi reset)(ansi blue)> (ansi reset)($prompt)"
 }
 
 def retry [block: closure, max = $max_retry] {
@@ -316,6 +348,10 @@ export def --env chat [initial_prompt, generation_config = {}, history = []] {
     }
     '\model' => {
       set_model ($models | input list)
+      set_agent ""
+    }
+    '\agent' => {
+      set_agent ((get_agents | append "no agent") | input list)
     }
     '\session_info' => {
       # ensure a session exists before starting a new one
