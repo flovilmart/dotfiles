@@ -139,6 +139,11 @@ export def generate_content [input, generation_config = {}, history = []] {
   retry { http post -t application/json -e -H (headers) $url $final_body }
 }
 
+def confirm [msg: string] {
+  let res = (input $"(ansi yellow)($msg)(ansi reset) (y/n)")
+  return ($res | str starts-with "y")
+}
+
 def exec_function_call [tool_call] {
   let function_call = ($tool_call | get function)
   let id = ($tool_call | get id)
@@ -167,10 +172,9 @@ def exec_function_call [tool_call] {
         }
         try {
           return ($args.contents | save $args.path)
-        } catch {
-          |err| print $"Error writing to file: ($err.msg)"
-          let force = (input "Do you want to ? (y/n)")
-          if ($force | str starts-with "y") {
+        } catch { |err|
+          print $"Error writing to file: ($err.msg)"
+          if (confirm "Do you want to overwrite the file?") {
             return ($args.contents | save -f $args.path)
           }
           return $err
