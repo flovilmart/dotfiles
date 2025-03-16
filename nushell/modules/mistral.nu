@@ -1,7 +1,5 @@
 use asana.nu
 
-const config = { default_model: "mistral-small-latest", api_version: "v1" }
-
 # Pricing: https://mistral.ai/products/la-plateforme#pricing
 const models = [
   "mistral-small-latest" # not expensive
@@ -21,23 +19,6 @@ export def get_models [] {
 }
 
 const max_retry = 0
-export def --env set_model [model: string] {
-  $env.MISTRAL_MODEL = $model
-}
-
-def get_model [] {
-  if ("MISTRAL_MODEL" in $env) {
-    return $env.MISTRAL_MODEL
-  }
-  return $config.default_model
-}
-
-def get_agent [] {
-  if ("MISTRAL_AGENT" in $env) {
-    return $env.MISTRAL_AGENT
-  }
-  null
-}
 
 def get_agents [] {
   if ("MISTRAL_AGENTS" in $env) {
@@ -46,33 +27,11 @@ def get_agents [] {
   []
 }
 
-def --env set_agent [agent: string] {
-  if ($agent | is-empty) or ($agent == "no agent") {
-    if ("MISTRAL_AGENT" in $env) {
-      hide-env MISTRAL_AGENT
-    }
-  } else {
-    $env.MISTRAL_AGENT = $agent
+def get_current_runtime [state] {
+  if ($state.config.agent | is-not-empty) {
+    return $"ag:($state.config.agent | split row ":" | get 3)"
   }
-}
-
-def get_current_runtime [] {
-  let agent = (get_agent)
-  if ($agent | is-not-empty) {
-    return $"ag:($agent | split row ":" | get 3)"
-  }
-  return (get_model)
-}
-
-def debug-is-on [] {
-  "MISTRAL_DEBUG" in $env
-}
-
-def get_api_version [] {
-  if ("MISTRAL_API_VERSION" in $env) {
-    return $env.MISTRAL_API_VERSION
-  }
-  return $config.api_version
+  return $state.config.model
 }
 
 def content_block [source: string, str: string] {
@@ -82,8 +41,8 @@ def content_block [source: string, str: string] {
   }
 }
 
-def get_prompt [prompt: string = ""] {
-  $"(ansi rb)Mistral (ansi green)\((get_current_runtime)\)(ansi reset)(ansi blue)> (ansi reset)($prompt)"
+def get_prompt [state, prompt: string = ""] {
+  $"(ansi rb)Mistral (ansi green)\((get_current_runtime $state)\)(ansi reset)(ansi blue)> (ansi reset)($prompt)"
 }
 
 def retry [block: closure, max = $max_retry] {
@@ -177,25 +136,25 @@ def headers [] {
   ["Authorization", $"Bearer ($env.MISTRAL_API_KEY)"]
 }
 
-export def generate_content [input, generation_config = {}, history = []] {
+export def generate_content [state, input] {
   mut body = {
     "messages": []
     tools: (asana_tools | append (fs_functions))
   }
   mut api = "chat"
-  if ("MISTRAL_AGENT" in $env) {
-    $body.agent_id = $env.MISTRAL_AGENT
+  if ($state.config.agent | is-not-empty) {
+    $body.agent_id = $state.config.agent
     $api = "agents"
   } else {
-    $body.model = (get_model)
+    $body.model = $state.config.model
   }
-  let url = $"https://api.mistral.ai/(get_api_version)/($api)/completions"
-  $body.messages = build_history $history
+  let url = $"https://api.mistral.ai/v1/($api)/completions"
+  $body.messages = build_history $state.history
 
   $body.messages = $body.messages | append ($input | as_message)
 
   let final_body = $body
-  if (debug-is-on) {
+  if ($state.config.debug) {
     print ($final_body | to json -r)
   }
   try {
@@ -275,16 +234,18 @@ def param-from-command [val, command] {
   $val | split row $command | each { str trim } | filter { is-not-empty }
 }
 
-def --env init_session [] {
+def --env init_session [state] {
+  mut state = $state
   mkdir ~/.mistral/sessions
-  if not ("MISTRAL_SESSION_ID" in $env) {
-    $env.MISTRAL_SESSION_ID = (^date +%s)
+  if not ("session_id" in $state) {
+    $state.session_id = (^date +%s)
   }
-  $env.MISTRAL_SESSION_PATH = $"~/.mistral/sessions/($env.MISTRAL_SESSION_ID).json"
+  $state.session_path = $"~/.mistral/sessions/($state.session_id).json"
+  return $state
 }
 
-def append_session [entry] {
-  (($entry | to json -r) + "\n") | save -a $env.MISTRAL_SESSION_PATH
+def append_session [state, entry] {
+  (($entry | to json -r) + "\n") | save -a $state.session_path
 }
 
 def history_from_stream [] {
@@ -296,71 +257,56 @@ def history_from_stream [] {
   }
 }
 
-export def --env chat [initial_prompt, generation_config = {}, history = []] {
-  init_session
-  mut history: any = $history
-  mut text = $initial_prompt
-
-  mut next_call: any = null
-
-  let state = {
-    session: $history
-  }
-  # Check if we have a prompt, if not, ask for one
-  if ($text | is-empty) {
-    # TODO: Listen for up / down keys to cycle through previous queries
-    $text = (input $"(get_prompt)" | str trim)
-  } else if ($text | is-string) {
-    print (get_prompt $text)
-  }
+def --env handle_command [state, text] {
+  mut state = $state
   match $text {
     '\dump' => {
       $env.MISTRAL_STATE = $state
       print $state
     }
     '\exit' => {
-      return $state
+      $state.exit = true
     }
     '\debug' => {
-      $env.MISTRAL_DEBUG = "true"
+      $state.config.debug = true
     }
     '\debug off' => {
-      if (debug-is-on) {
-        hide-env MISTRAL_DEBUG
-      }
+      $state.config.debug = false
     }
     '\usage' => {
-      $env.MISTRAL_PRINT_USAGE = "true"
+      $state.config.usage = true
     }
     '\usage off' => {
-      if ("MISTRAL_PRINT_USAGE" in $env) {
-        hide-env MISTRAL_PRINT_USAGE
-      }
+      $state.config.usage = false
     }
     '\reset' => {
-      $history = []
-      if ("MISTRAL_SESSION_ID" in $env) {
-        hide-env MISTRAL_SESSION_ID
-      }
-      if ("MISTRAL_SESSION_PATH" in $env) {
-        hide-env MISTRAL_SESSION_PATH
-      }
+      $state.history = []
+      $state.session_id = (^date +%s)
+      $state.session_path = $"~/.mistral/sessions/($state.session_id).json"
     }
     '\model' => {
-      set_model ($models | input list)
-      set_agent ""
+      $state.config.model = ($models | input list)
+      $state.config.agent = ""
     }
     '\agent' => {
-      set_agent ((get_agents | append "no agent") | input list)
+      let new_agent = ((get_agents | append "no agent") | input list)
+      if ($new_agent == "no agent") {
+        $state.config.agent = ""
+      } else {
+        $state.config.agent = $new_agent
+      }
+    }
+    '\agent off' => {
+      $state.config.agent = ""
     }
     '\session_info' => {
       # ensure a session exists before starting a new one
-      init_session
-      print { path: $env.MISTRAL_SESSION_PATH, id: $env.MISTRAL_SESSION_ID }
+      $state = init_session $state
+      print { path: $state.session_path, id: $state.session_id }
     }
     '\restore' => {
       let source = (ls ~/.mistral/sessions | input list | get name)
-      $history = (open -r $source | history_from_stream)
+      $state.history = (open -r $source | history_from_stream)
     }
     # TODO: only run if this is a string before checking
     $val if ($val | is-command '\save') => {
@@ -378,61 +324,96 @@ export def --env chat [initial_prompt, generation_config = {}, history = []] {
         print $"Error saving file: ($err.msg)"
       }
     }
-    _ => {
-      print -rn $"- running...."
-      let input_message = $text | as_message
-      append_session $input_message
+  }
+  $state
+}
 
-      let response = (generate_content $text $generation_config $history)
-      # Append the previous call in the history
-      $history = $history | append $input_message
+export def --env chat [initial_prompt, state] {
+  mut state = init_session $state
+  mut history: any = $state.history
+  mut text = $initial_prompt
 
-      if (debug-is-on) {
-        print ($response | to json -r)
+  mut next_call: any = null
+
+  # Check if we have a prompt, if not, ask for one
+  if ($text | is-empty) {
+    # TODO: Listen for up / down keys to cycle through previous queries
+    $text = (input $"(get_prompt $state)" | str trim)
+  } else if ($text | is-string) {
+    print (get_prompt $state $text)
+  }
+  if (($text | str index-of '\') == 0) {
+    # handle command!
+    $state = (handle_command $state $text)
+  } else {
+    print -rn $"- running...."
+    let input_message = $text | as_message
+    append_session $state $input_message
+
+    let response = (generate_content $state $text)
+    # Append the previous call in the history
+    $state.history = $state.history | append $input_message
+
+    if ($state.config.debug) {
+      print ($response | to json -r)
+    }
+
+    if ("choices" in $response) {
+      let message = $response | get choices.0.message
+      $state.history = $state.history | append $message
+      append_session $state $message
+
+      print -rn $"\r"
+      print ($message | get content)
+      if ($state.config.usage) {
+        print ($response | get usage)
       }
 
-      if ("choices" in $response) {
-        let message = $response | get choices.0.message
-        $history = $history | append $message
-        append_session $message
-
-        print -rn $"\r"
-        print ($message | get content)
-        if ("MISTRAL_PRINT_USAGE" in $env) {
-          print ($response | get usage)
+      if ("tool_calls" in $message) {
+        # here we just get the 1st tool call.
+        let tool_call = ($message | get tool_calls | get 0?)
+        if ($tool_call | is-not-empty) {
+          $next_call = ($message | get tool_calls | each { |tool_call|
+            let call_res = (exec_function_call $tool_call)
+            {
+              "role": "tool",
+              "name" : ($tool_call | get function.name),
+              "tool_call_id": $tool_call.id,
+              "content": ($call_res | to json -r)
+            }
+          })
         }
-
-        if ("tool_calls" in $message) {
-          # here we just get the 1st tool call.
-          let tool_call = ($message | get tool_calls | get 0?)
-          if ($tool_call | is-not-empty) {
-            $next_call = ($message | get tool_calls | each { |tool_call|
-              let call_res = (exec_function_call $tool_call)
-              {
-                "role": "tool",
-                "name" : ($tool_call | get function.name),
-                "tool_call_id": $tool_call.id,
-                "content": ($call_res | to json -r)
-              }
-            })
-          }
-        }
-      } else {
-        print ($response | to json -r)
       }
+    } else {
+      print ($response | to json -r)
     }
   }
 
+  if ($state.exit) {
+    return $state
+  }
+
   # loop back in!
-  chat $next_call $generation_config $history
+  chat $next_call $state
 }
 
-export def --env main [prompt: string = "", generation_config = {}] {
-  mut history = []
+const default_state = {
+  exit: false,
+  config: {
+    debug: false,
+    usage: false
+    agent: "",
+    model: "mistral-small-latest",
+  }
+  history: []
+}
+
+export def --env main [prompt: string = "", state = $default_state] {
+  mut state = $state
   let input = $in
   if (($input | describe) == "byte stream") {
-    $history = $input | history_from_stream
+    $state.history = $input | history_from_stream
   }
-  chat $prompt $generation_config $history
+  chat $prompt $state
 }
 
