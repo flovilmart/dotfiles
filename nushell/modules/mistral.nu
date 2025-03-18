@@ -116,7 +116,7 @@ def fs_functions [] {
     { type: "function",
       function: {
         name: "exec",
-        description: "execute an arbitrary command in the current directory. Retuns the stdout, stderr and exit_code of the command",
+        description: "execute or run an arbitrary command in the current directory. To run a full script, save is using fs_write first, in a temporary file in the /tmp folder. Retuns the stdout, stderr and exit_code of the command",
         parameters: {
           type: "object",
           properties: {
@@ -162,7 +162,7 @@ export def generate_content [state, input] {
   } catch { |err| $err.msg }
 }
 
-def confirm [msg: string] {
+def confirm [msg: string = "Confirm?"] {
   let res = (input $"(ansi yellow)($msg)(ansi reset) \(y/n\) ")
   return ($res | str starts-with "y")
 }
@@ -189,15 +189,15 @@ def exec_function_call [tool_call] {
       }
       "fs_write" => {
         let dir = ($args.path | path dirname)
-        if not ($dir | path exists) {
-          print $"Creating directory ($dir)"
+        if not ($dir | is-empty) and not ($dir | path exists) {
+          print $"Creating directory (ansi yellow)($dir)(ansi reset)"
           mkdir $dir
         }
         try {
           return ($args.contents | save $args.path)
         } catch { |err|
           print $"Error writing to file: ($err.msg)"
-          if (confirm "Do you want to overwrite the file?") {
+          if (confirm $"Do you want to overwrite ($args.path)?") {
             return ($args.contents | save -f $args.path)
           }
           return $err
@@ -210,9 +210,16 @@ def exec_function_call [tool_call] {
         return (ls $args.path)
       }
       "exec" => {
-        # Here we use complete to get stdout & stderr and exit code:
-        # https://www.nushell.sh/book/stdout_stderr_exit_codes.html#stderr
-        return (nu -c $args.command | complete)
+        print $"Do you want to exec the command (ansi red)($args.command)(ansi reset)?"
+        if (confirm) {
+          # Here we use complete to get stdout & stderr and exit code:
+          # https://www.nushell.sh/book/stdout_stderr_exit_codes.html#stderr
+          return (nu -c $args.command | complete)
+        }
+        return { "error": "denied by the user" }
+      }
+      _ => {
+        return { "error": "unknown function" }
       }
     }
   } catch {
@@ -324,6 +331,9 @@ def --env handle_command [state, text] {
         print $"Error saving file: ($err.msg)"
       }
     }
+    _ => {
+      print $"(ansi red)Unknown command: (ansi rb)($text)(ansi reset)"
+    }
   }
   $state
 }
@@ -331,70 +341,70 @@ def --env handle_command [state, text] {
 export def --env chat [initial_prompt, state] {
   mut state = init_session $state
   mut history: any = $state.history
-  mut text = $initial_prompt
+  mut input: any = $initial_prompt
 
-  mut next_call: any = null
-
-  # Check if we have a prompt, if not, ask for one
-  if ($text | is-empty) {
-    # TODO: Listen for up / down keys to cycle through previous queries
-    $text = (input $"(get_prompt $state)" | str trim)
-  } else if ($text | is-string) {
-    print (get_prompt $state $text)
-  }
-  if (($text | str index-of '\') == 0) {
-    # handle command!
-    $state = (handle_command $state $text)
-  } else {
-    print -rn $"- running...."
-    let input_message = $text | as_message
-    append_session $state $input_message
-
-    let response = (generate_content $state $text)
-    # Append the previous call in the history
-    $state.history = $state.history | append $input_message
-
-    if ($state.config.debug) {
-      print ($response | to json -r)
+  loop {
+    # Check if we have a prompt, if not, ask for one
+    if ($input | is-empty) {
+      # TODO: Listen for up / down keys to cycle through previous queries
+      $input = (input $"(get_prompt $state)" | str trim)
+    } else if ($input | is-string) {
+      print (get_prompt $state $input)
     }
-
-    if ("choices" in $response) {
-      let message = $response | get choices.0.message
-      $state.history = $state.history | append $message
-      append_session $state $message
-
-      print -rn $"\r"
-      print ($message | get content)
-      if ($state.config.usage) {
-        print ($response | get usage)
-      }
-
-      if ("tool_calls" in $message) {
-        # here we just get the 1st tool call.
-        let tool_call = ($message | get tool_calls | get 0?)
-        if ($tool_call | is-not-empty) {
-          $next_call = ($message | get tool_calls | each { |tool_call|
-            let call_res = (exec_function_call $tool_call)
-            {
-              "role": "tool",
-              "name" : ($tool_call | get function.name),
-              "tool_call_id": $tool_call.id,
-              "content": ($call_res | to json -r)
-            }
-          })
-        }
-      }
+    if (($input | str index-of '\') == 0) {
+      # handle command!
+      $state = (handle_command $state $input)
+      $input = ""
     } else {
-      print ($response | to json -r)
+      print -rn $"- running...."
+      let input_message = $input | as_message
+      append_session $state $input_message
+
+      let response = (generate_content $state $input)
+      $input = ""
+      # Append the previous call in the history
+      $state.history = $state.history | append $input_message
+
+      if ($state.config.debug) {
+        print ($response | to json -r)
+      }
+
+      if ("choices" in $response) {
+        let message = $response | get choices.0.message
+        $state.history = $state.history | append $message
+        append_session $state $message
+
+        print -rn $"\r"
+        print ($message | get content)
+        if ($state.config.usage) {
+          print ($response | get usage)
+        }
+
+        if ("tool_calls" in $message) {
+          # here we just get the 1st tool call.
+          let tool_calls = ($message | get tool_calls)
+          if ($tool_calls | is-not-empty) {
+            $input = ($tool_calls | each { |tool_call|
+              let call_res = (exec_function_call $tool_call)
+              {
+                "role": "tool",
+                "name" : ($tool_call | get function.name),
+                "tool_call_id": $tool_call.id,
+                "content": ($call_res | to json -r)
+              }
+            })
+          }
+        }
+      } else {
+        print ($response | to json -r)
+      }
+    }
+
+    # IF we marked to exit, exit now...
+    if ($state.exit) {
+      return $state
     }
   }
-
-  if ($state.exit) {
-    return $state
-  }
-
-  # loop back in!
-  chat $next_call $state
 }
 
 const default_state = {
