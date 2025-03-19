@@ -42,7 +42,13 @@ def content_block [source: string, str: string] {
 }
 
 def get_prompt [state, prompt: string = ""] {
-  $"(ansi rb)Mistral (ansi green)\((get_current_runtime $state)\)(ansi reset)(ansi blue)> (ansi reset)($prompt)"
+  mut parent_state = $state.parent
+  mut parent_prompt = ""
+  while ($parent_state | is-not-empty) {
+    $parent_prompt = [(get_current_runtime $parent_state), " > ", $parent_prompt] | str join " "
+    $parent_state = $parent_state.parent
+  }
+  $"(ansi rb)Mistral (ansi green)\(($parent_prompt)(get_current_runtime $state)\)(ansi reset)(ansi blue)> (ansi reset)($prompt)"
 }
 
 def retry [block: closure, max = $max_retry] {
@@ -125,6 +131,19 @@ def fs_functions [] {
         }
       }
     },
+    { type: "function",
+      function: {
+        name: "agent",
+        description: "use an external agent to prompt. 1 agent (applescripter) is expert with interacting with the host system applications such as Mail. Once this agent has completed its work. it sends a DONE message.",
+        parameters: {
+          type: "object",
+          properties: {
+            "agent": { type: "string", description: "name of the agent" },
+            "command": { type: "string", description: "the prompt to send to the agent" },
+          }
+        }
+      }
+    },
   ]
 }
 
@@ -167,7 +186,7 @@ def confirm [msg: string = "Confirm?"] {
   return ($res | str starts-with "y")
 }
 
-def exec_function_call [tool_call] {
+def exec_function_call [tool_call, state] {
   let function_call = ($tool_call | get function)
   let id = ($tool_call | get id)
   let name = ($function_call | get name)
@@ -217,6 +236,18 @@ def exec_function_call [tool_call] {
           return (nu -c $args.command | complete)
         }
         return { "error": "denied by the user" }
+      }
+      "agent" => {
+        let parent_state = $state
+        mut state = $state
+        $state.config.agent = "ag:71b0a997:20250318:applescripter:6484808f"
+        $state.history = []
+        $state.parent = $parent_state
+        let res = (chat $"You are the applescripter agent. If you need to call the applescripter agent, do not do it. Use your own capabilities instead. You have been called from another AI. You are tasked to complete the following TASK \"($args.command)\". When you have completed the task, respond with 'DONE'" $state)
+        print "Agent completed"
+        print $res
+        # Agent calls have the result field set
+        return $res | get result
       }
       _ => {
         return { "error": "unknown function" }
@@ -376,6 +407,12 @@ export def --env chat [initial_prompt, state] {
 
         print -rn $"\r"
         print ($message | get content)
+        if (($message | get content) | is-not-empty) {
+          $state.result = $message | get content
+        }
+        if (($message | get content) == "DONE") and ($state.parent | is-not-empty) {
+          $state.exit = true
+        }
         if ($state.config.usage) {
           print ($response | get usage)
         }
@@ -383,16 +420,13 @@ export def --env chat [initial_prompt, state] {
         if ("tool_calls" in $message) {
           # here we just get the 1st tool call.
           let tool_calls = ($message | get tool_calls)
+          let immut_state = $state
           if ($tool_calls | is-not-empty) {
-            $input = ($tool_calls | each { |tool_call|
-              let call_res = (exec_function_call $tool_call)
-              {
-                "role": "tool",
-                "name" : ($tool_call | get function.name),
-                "tool_call_id": $tool_call.id,
-                "content": ($call_res | to json -r)
-              }
-            })
+            $input = ($tool_calls | each { exec_tool_call $immut_state })
+            $state.result = $input
+            if ($input == "DONE") and ($state.parent | is-not-empty) {
+              $state.exit = true
+            }
           }
         }
       } else {
@@ -407,8 +441,21 @@ export def --env chat [initial_prompt, state] {
   }
 }
 
+def exec_tool_call [state] {
+  let tool_call = $in
+  let call_res = (exec_function_call $tool_call $state)
+  {
+    "role": "tool",
+    "name" : ($tool_call | get function.name),
+    "tool_call_id": $tool_call.id,
+    "content": ($call_res | to json -r)
+  }
+}
+
 const default_state = {
   exit: false,
+  parent: {},
+  result: {},
   config: {
     debug: false,
     usage: false
