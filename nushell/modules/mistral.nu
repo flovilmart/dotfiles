@@ -115,16 +115,19 @@ def fs_functions [] {
         }
         try {
           if ($state.config.force_overwrite) {
-            return ($args.contents | save -f $args.path)
+            ($args.contents | save -f $args.path)
           }
-          return ($args.contents | save $args.path)
+          ($args.contents | save $args.path)
         } catch { |err|
           print $"Error writing to file: ($err.msg)"
           if (confirm $"Do you want to overwrite ($args.path)?") {
-            return ($args.contents | save -f $args.path)
+            ($args.contents | save -f $args.path)
+          } else {
+            return $err
+
           }
-          return $err
         }
+        return "File saved!"
       }
     },
     { type: "function",
@@ -507,18 +510,28 @@ const default_state = {
     debug: false,
     usage: false
     force_overwrite: false,
+    always_exec: false,
     agent: "",
     model: "mistral-small-latest",
   }
   history: []
 }
 
-export def --env main [prompt: string = "", state = $default_state] {
+export def --env main [--model: string = "", prompt: string = "", state = $default_state] {
   mut state = $state
   let input = $in
   if (($input | describe) == "string") {
     $state.history = $input | history_from_stream
     print $"Restored history ($state.history | length) entries"
+  }
+  if ($model | is-not-empty) {
+    if ($model in $models) {
+      $state.config.model = $model
+    } else {
+      print $"Model ($model) not found in available models"
+      $state.config.model = ($models | input list)
+      $state.config.agent = ""
+    }
   }
   chat $prompt $state
 }
