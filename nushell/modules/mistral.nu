@@ -45,7 +45,7 @@ def get_prompt [state, prompt: string = ""] {
   mut parent_state = $state.parent
   mut parent_prompt = ""
   while ($parent_state | is-not-empty) {
-    $parent_prompt = [(get_current_runtime $parent_state), " > ", $parent_prompt] | str join " "
+    $parent_prompt = [(get_current_runtime $parent_state), ">", $parent_prompt] | str join " "
     $parent_state = $parent_state.parent
   }
   $"(ansi rb)Mistral (ansi green)\(($parent_prompt)(get_current_runtime $state)\)(ansi reset)(ansi blue)> (ansi reset)($prompt)"
@@ -72,7 +72,7 @@ def build_history [state = []] {
 }
 
 def as_message [] {
-  let input = $in
+  mut input = $in
   if ($input | is-string) {
     content_block "user" $input
   } else {
@@ -84,6 +84,19 @@ def fs_functions [] {
   return [
     { type: "function",
       function: {
+        name: "date",
+        description: "get the current date",
+        parameters: {
+          type: "object",
+          properties: {}
+        }
+      },
+      handler: { |args, state|
+        return (date now)
+      }
+    },
+    { type: "function",
+      function: {
         name: "fs_write",
         description: "write the content to the path in the file system",
         parameters: {
@@ -92,6 +105,25 @@ def fs_functions [] {
             "path": { type: "string", description: "the path to write the contents" },
             "contents": { type: "string", description: "the content to write" }
           }
+        }
+      }
+      handler: { |args, state|
+        let dir = ($args.path | path dirname)
+        if not ($dir | is-empty) and not ($dir | path exists) {
+          print $"Creating directory (ansi yellow)($dir)(ansi reset)"
+          mkdir $dir
+        }
+        try {
+          if ($state.config.force_overwrite) {
+            return ($args.contents | save -f $args.path)
+          }
+          return ($args.contents | save $args.path)
+        } catch { |err|
+          print $"Error writing to file: ($err.msg)"
+          if (confirm $"Do you want to overwrite ($args.path)?") {
+            return ($args.contents | save -f $args.path)
+          }
+          return $err
         }
       }
     },
@@ -106,6 +138,9 @@ def fs_functions [] {
           }
         }
       }
+      handler: { |args, state|
+        return (open -r $args.path)
+      }
     },
     { type: "function",
       function: {
@@ -117,6 +152,9 @@ def fs_functions [] {
             "path": { type: "string", description: "the path to list the files from" },
           }
         }
+      }
+      handler:  { |args, state|
+        return (ls $args.path)
       }
     },
     { type: "function",
@@ -130,35 +168,53 @@ def fs_functions [] {
           }
         }
       }
-    },
-    { type: "function",
-      function: {
-        name: "agent",
-        description: "use an external agent to prompt. 1 agent (applescripter) is expert with interacting with the host system applications such as Mail. Once this agent has completed its work. it sends a DONE message.",
-        parameters: {
-          type: "object",
-          properties: {
-            "agent": { type: "string", description: "name of the agent" },
-            "command": { type: "string", description: "the prompt to send to the agent" },
-          }
+      handler: { |args, state|
+        print $"Do you want to exec the command (ansi red)($args.command)(ansi reset)?"
+        if (confirm) {
+          # Here we use complete to get stdout & stderr and exit code:
+          # https://www.nushell.sh/book/stdout_stderr_exit_codes.html#stderr
+          return (nu -c $args.command | complete)
         }
+        return { "error": "denied by the user" }
       }
     },
+    # { type: "function",
+    #   function: {
+    #     name: "agent",
+    #     description: "use an external agent to prompt. 1 agent (applescripter) is expert with interacting with the host system applications such as Mail. Once this agent has completed its work. it sends a DONE message.",
+    #     parameters: {
+    #       type: "object",
+    #       properties: {
+    #         "agent": { type: "string", description: "name of the agent" },
+    #         "command": { type: "string", description: "the prompt to send to the agent" },
+    #       }
+    #     }
+    #   }
+    # },
   ]
 }
 
 def asana_tools [] {
-  (asana ai function declarations | each { |item| { "type": "function", "function": $item } })
+  (asana ai function declarations)
+}
+
+def all_tools [] {
+  asana_tools | append (fs_functions)
 }
 
 def headers [] {
   ["Authorization", $"Bearer ($env.MISTRAL_API_KEY)"]
 }
 
+def to-tools [] {
+  let funcs = $in
+  $funcs | each { |tool| { "type": "function", "function": $tool.function } }
+}
+
 export def generate_content [state, input] {
   mut body = {
     "messages": []
-    tools: (asana_tools | append (fs_functions))
+    tools: (all_tools | to-tools)
   }
   mut api = "chat"
   if ($state.config.agent | is-not-empty) {
@@ -174,7 +230,7 @@ export def generate_content [state, input] {
 
   let final_body = $body
   if ($state.config.debug) {
-    print ($final_body | to json -r)
+    print $"Request: ($final_body | to json -r)"
   }
   try {
     http post -t application/json -e -H (headers) $url $final_body
@@ -194,63 +250,30 @@ def exec_function_call [tool_call, state] {
   print $"Running (ansi yellow_italic)($name)(ansi reset) with args: (ansi blue)($args)(ansi reset)"
   try {
     match $name {
-      "asana_typeahead" => {
-        return (asana typeahead $args.type $args.query)
-      },
-      "asana_api_get" => {
-        return (asana api get $args.url)
-      }
-      "asana_api_post" => {
-        return (asana api post $args.url ($args.body | from json))
-      }
-      "asana_api_put" => {
-        return (asana api put $args.url ($args.body | from json))
-      }
-      "fs_write" => {
-        let dir = ($args.path | path dirname)
-        if not ($dir | is-empty) and not ($dir | path exists) {
-          print $"Creating directory (ansi yellow)($dir)(ansi reset)"
-          mkdir $dir
+      # "agent" => {
+      #   let parent_state = $state
+      #   mut state = $state
+      #   $state.config.agent = "ag:71b0a997:20250318:applescripter:6484808f"
+      #   # Remove the agent call
+      #   $state.history = $state.history | drop
+      #   $state.parent = $parent_state
+      #   let res = (chat $"Never call the applescripter agent from yourself. Never call the agent tool. Always execute the generated script. Once done, respond with the result of the generated script and add \"\n\nDONE\". Do the following \'($args.command)\'" $state)
+      #   print $"Agent completed ($res | get result)"
+      #   return $res | get result
+      # }
+      _ => {
+        let func = (all_tools | filter { |f| $f.function.name == $name })
+
+        if ($func | is-empty) {
+          return { "error": "unknown function" }
         }
+
         try {
-          return ($args.contents | save $args.path)
-        } catch { |err|
-          print $"Error writing to file: ($err.msg)"
-          if (confirm $"Do you want to overwrite ($args.path)?") {
-            return ($args.contents | save -f $args.path)
-          }
+          return (do ($func | get handler | get 0) $args $state)
+        } catch {
+          |err| print $"Error running function: ($err.msg)"
           return $err
         }
-      }
-      "fs_read" => {
-        return (open -r $args.path)
-      }
-      "fs_ls" => {
-        return (ls $args.path)
-      }
-      "exec" => {
-        print $"Do you want to exec the command (ansi red)($args.command)(ansi reset)?"
-        if (confirm) {
-          # Here we use complete to get stdout & stderr and exit code:
-          # https://www.nushell.sh/book/stdout_stderr_exit_codes.html#stderr
-          return (nu -c $args.command | complete)
-        }
-        return { "error": "denied by the user" }
-      }
-      "agent" => {
-        let parent_state = $state
-        mut state = $state
-        $state.config.agent = "ag:71b0a997:20250318:applescripter:6484808f"
-        $state.history = []
-        $state.parent = $parent_state
-        let res = (chat $"You are the applescripter agent. If you need to call the applescripter agent, do not do it. Use your own capabilities instead. You have been called from another AI. You are tasked to complete the following TASK \"($args.command)\". When you have completed the task, respond with 'DONE'" $state)
-        print "Agent completed"
-        print $res
-        # Agent calls have the result field set
-        return $res | get result
-      }
-      _ => {
-        return { "error": "unknown function" }
       }
     }
   } catch {
@@ -288,8 +311,8 @@ def append_session [state, entry] {
 
 def history_from_stream [] {
   let input = $in
-  if (($input | describe) == "byte stream") {
-    $input | lines | each { |line| $line | from json }
+  if (($input | describe) == "string") {
+    ($input | lines | each { |line| $line | from json }) | flatten
   } else {
     []
   }
@@ -316,6 +339,12 @@ def --env handle_command [state, text] {
     }
     '\usage off' => {
       $state.config.usage = false
+    }
+    '\force_overwrite' => {
+      $state.config.force_overwrite = true
+    }
+    '\force_overwrite off' => {
+      $state.config.force_overwrite = false
     }
     '\reset' => {
       $state.history = []
@@ -397,7 +426,7 @@ export def --env chat [initial_prompt, state] {
       $state.history = $state.history | append $input_message
 
       if ($state.config.debug) {
-        print ($response | to json -r)
+        print $"Response: $($response | to json -r)"
       }
 
       if ("choices" in $response) {
@@ -407,24 +436,39 @@ export def --env chat [initial_prompt, state] {
 
         print -rn $"\r"
         print ($message | get content)
+        mut tool_calls = []
         if (($message | get content) | is-not-empty) {
           $state.result = $message | get content
+          # Hack here - tool calls can be found in the content.
+          # PArse the content and get the tool calls
+          try {
+            let pot_tool_calls = ($message | from json)
+            if ($pot_tool_calls | describe) == "table" {
+              $tool_calls = $pot_tool_calls
+            }
+          }
         }
-        if (($message | get content) == "DONE") and ($state.parent | is-not-empty) {
+        if (($message | get content) | str ends-with "DONE") and ($state.parent | is-not-empty) {
           $state.exit = true
         }
         if ($state.config.usage) {
           print ($response | get usage)
         }
-
         if ("tool_calls" in $message) {
           # here we just get the 1st tool call.
-          let tool_calls = ($message | get tool_calls)
+          $tool_calls = ($message | get tool_calls)
+        }
+
+        if ($tool_calls | is-not-empty) {
           let immut_state = $state
           if ($tool_calls | is-not-empty) {
             $input = ($tool_calls | each { exec_tool_call $immut_state })
+            # store the result here. If we are doing an agentic call, then the input will be passed back to the agent
+            # which will in turn respond with DONE, if complete. At that point, we will return the $state with the previous result.
+            # We could embed also the whole history for the agent call (query, responses) but that seems wasteful!
             $state.result = $input
-            if ($input == "DONE") and ($state.parent | is-not-empty) {
+            # it is unlikely the tool call will return a DONE, but let's exit anyway
+            if ($input | is-string) and ($input | str ends-with "DONE") and ($state.parent | is-not-empty) {
               $state.exit = true
             }
           }
@@ -444,6 +488,9 @@ export def --env chat [initial_prompt, state] {
 def exec_tool_call [state] {
   let tool_call = $in
   let call_res = (exec_function_call $tool_call $state)
+  if ($state.config.debug) {
+    print $"Tool call response: ($call_res | to json -r)"
+  }
   {
     "role": "tool",
     "name" : ($tool_call | get function.name),
@@ -459,6 +506,7 @@ const default_state = {
   config: {
     debug: false,
     usage: false
+    force_overwrite: false,
     agent: "",
     model: "mistral-small-latest",
   }
@@ -468,8 +516,9 @@ const default_state = {
 export def --env main [prompt: string = "", state = $default_state] {
   mut state = $state
   let input = $in
-  if (($input | describe) == "byte stream") {
+  if (($input | describe) == "string") {
     $state.history = $input | history_from_stream
+    print $"Restored history ($state.history | length) entries"
   }
   chat $prompt $state
 }

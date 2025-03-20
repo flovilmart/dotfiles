@@ -145,103 +145,6 @@ export module api {
   }
 }
 
-export def "ai function declarations" [] {
-  return [
-    {
-      name: "asana_api_get"
-      description: "
-makes a get api call on the asana API.
-
-Notable APIs:
-
-When needing to pass a workspace ID add it to the url query parameters in the form workspace=ASANA_WORKSPACE_ID
-When needing to pass assignee, always use the global id (GID) of the user unless specified othewise.
-
-GET time period: https://app.asana.com/api/1.0/time_periods
-Searching for tasks: https://app.asana.com/api/1.0/workspaces/ASANA_WORKSPACE_ID/tasks/search
-
-GET user: https://app.asana.com/api/1.0/users/USER_GID (USER_GID is the user's global id)
-GET the current user: https://app.asana.com/api/1.0/users/me
-"
-      parameters: {
-        type: "object"
-        properties: {
-          "url": {
-            "type": "string"
-            "description": "The URL to make the get request to"
-          }
-        }
-      }
-    }
-    {
-      name: "asana_api_post",
-      description: "
-makes a post api call on the asana API
-
-Notable APIs:
-
-Create task: https://app.asana.com/api/1.0/tasks
-Create goal: https://app.asana.com/api/1.0/goals
-"
-      parameters: {
-        type: "object"
-        properties: {
-          "url": {
-            "type": "string",
-            "description": "The URL to make the post request to"
-          }
-          "body": {
-            "type": "string",
-            "description": "The body of the post request in a JSON stringified format. All asana API request have a top level data key."
-          }
-        }
-      }
-    },
-    {
-      name: "asana_api_put"
-      description: "
-makes a PUT api call on the asana API.
-
-This is use to update a resource.
-
-Notable APIs:
-
-Update task: https://app.asana.com/api/1.0/tasks/RESOURCE_ID
-Update goal: https://app.asana.com/api/1.0/goals/RESOURCE_ID
-"
-      parameters: {
-        type: "object"
-        properties: {
-          "url": {
-            "type": "string",
-            "description": "The URL to make the post request to"
-          },
-          "body": {
-            "type": "string",
-            "description": "The body of the post request in a JSON stringified format. All asana API request have a top level data key."
-          }
-        }
-      }
-    } {
-      name: "asana_typeahead"
-      description: "Allows to find user, project, tasks etc... by their name",
-      parameters: {
-        type: "object",
-        properties: {
-          "type": {
-            "type": "string",
-            "description": "The type of resource to search for"
-          },
-          "query": {
-            "type": "string",
-            "description": "The query to search for"
-          }
-        }
-      }
-    }
-  ]
-}
-
 use api
 
 export def typeahead [type: string, query: string] {
@@ -251,6 +154,128 @@ export def typeahead [type: string, query: string] {
       query: $query
   }
   api get $"($url)?resource_type=($type)&query=($query)"
+}
+
+
+export def "ai function declarations" [] {
+  return [
+    {
+      type: "function",
+      function: {
+        name: "asana_api_get"
+        description: "
+makes   a get api call on the asana API.
+
+Notabl  e APIs:
+
+When n  eeding to pass a workspace ID add it to the url query parameters in the form workspace=ASANA_WORKSPACE_ID
+When n  eeding to pass assignee, always use the global id (GID) of the user unless specified othewise.
+
+GET ti  me period: https://app.asana.com/api/1.0/time_periods
+Search  ing for tasks: https://app.asana.com/api/1.0/workspaces/ASANA_WORKSPACE_ID/tasks/search
+
+GET us  er: https://app.asana.com/api/1.0/users/USER_GID (USER_GID is the user's global id)
+GET th  e current user: https://app.asana.com/api/1.0/users/me
+"
+        parameters: {
+          type: "object"
+          properties: {
+            "url": {
+              "type": "string"
+              "description": "The URL to make the get request to"
+            }
+          }
+        }
+      }
+      handler: { |args, state|
+        return (api get $args.url)
+      }
+    }
+    {
+      type: "function"
+      function: {
+        name: "asana_api_post",
+        description: "
+makes   a post api call on the asana API
+
+Notabl  e APIs:
+
+Create   task: https://app.asana.com/api/1.0/tasks
+Create   goal: https://app.asana.com/api/1.0/goals
+"
+        parameters: {
+          type: "object"
+          properties: {
+            "url": {
+              "type": "string",
+              "description": "The URL to make the post request to"
+            }
+            "body": {
+              "type": "string",
+              "description": "The body of the post request in a JSON stringified format. All asana API request have a top level data key."
+            }
+          }
+        }
+      }
+      handler: { |args, state|
+        return (api post $args.url ($args.body | from json))
+      }
+    },
+    {
+      type: "function"
+      function: {
+        name: "asana_api_put"
+        description: "
+makes a PUT api call on the asana API.
+
+This is use to update a resource.
+
+Notable APIs:
+
+Update task: https://app.asana.com/api/1.0/tasks/RESOURCE_ID
+Update goal: https://app.asana.com/api/1.0/goals/RESOURCE_ID
+"
+        parameters: {
+          type: "object"
+          properties: {
+            "url": {
+              "type": "string",
+              "description": "The URL to make the post request to"
+            },
+            "body": {
+              "type": "string",
+              "description": "The body of the post request in a JSON stringified format. All asana API request have a top level data key."
+            }
+          }
+        }
+      }
+      handler: { |args, state|
+        return (api put $args.url ($args.body | from json))
+      }
+    } {
+      type: "function"
+      function: {
+        name: "asana_typeahead"
+        description: "Allows to find user, project, tasks etc... by their name",
+        parameters: {
+          type: "object",
+          properties: {
+            "type": {
+              "type": "string",
+              "description": "The type of resource to search for"
+            },
+            "query": {
+              "type": "string",
+              "description": "The query to search for"
+            }
+          }
+        }
+      }
+      handler: { |args, state|
+        return (typeahead $args.type $args.query)
+      }
+    }
+  ]
 }
 
 export module project {
