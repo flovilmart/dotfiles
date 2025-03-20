@@ -196,12 +196,12 @@ GET th  e current user: https://app.asana.com/api/1.0/users/me
       function: {
         name: "asana_api_post",
         description: "
-makes   a post api call on the asana API
+makes a post api call on the asana API
 
-Notabl  e APIs:
+Notable APIs:
 
-Create   task: https://app.asana.com/api/1.0/tasks
-Create   goal: https://app.asana.com/api/1.0/goals
+Create task: https://app.asana.com/api/1.0/tasks
+Create goal: https://app.asana.com/api/1.0/goals
 "
         parameters: {
           type: "object"
