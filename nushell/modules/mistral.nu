@@ -315,7 +315,7 @@ def append_session [state, entry] {
 def history_from_stream [] {
   let input = $in
   if (($input | describe) == "string") {
-    ($input | lines | each { |line| $line | from json }) | flatten
+    ($input | lines | each { |line| $line | from json }) | flatten 1
   } else {
     []
   }
