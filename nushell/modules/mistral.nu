@@ -1,4 +1,18 @@
 use asana.nu
+const default_state = {
+  exit: false,
+  parent: {},
+  result: {},
+  config: {
+    debug: false,
+    usage: false
+    force_overwrite: false,
+    always_exec: false,
+    agent: "",
+    model: "mistral-small-latest",
+  }
+  history: []
+}
 
 # Pricing: https://mistral.ai/products/la-plateforme#pricing
 const models = [
@@ -116,15 +130,15 @@ def fs_functions [] {
         try {
           if ($state.config.force_overwrite) {
             ($args.contents | save -f $args.path)
+          } else {
+            ($args.contents | save $args.path)
           }
-          ($args.contents | save $args.path)
         } catch { |err|
           print $"Error writing to file: ($err.msg)"
           if (confirm $"Do you want to overwrite ($args.path)?") {
             ($args.contents | save -f $args.path)
           } else {
             return $err
-
           }
         }
         return "File saved!"
@@ -214,7 +228,7 @@ def to-tools [] {
   $funcs | each { |tool| { "type": "function", "function": $tool.function } }
 }
 
-export def generate_content [state, input] {
+export def generate_content [input, state = $default_state] {
   mut body = {
     "messages": []
     tools: (all_tools | to-tools)
@@ -401,7 +415,23 @@ def --env handle_command [state, text] {
   $state
 }
 
-export def --env chat [initial_prompt, state] {
+const DONE_FLAG = "DONE"
+
+def set-exit [state] {
+  if ($state.parent | is-empty) {
+    return $state
+  }
+
+  mut state = $state
+  let input = $in
+
+  if ($input | is-string) and ($input | str ends-with $DONE_FLAG) {
+    $state.exit = true
+  }
+  $state
+}
+
+def --env chat [initial_prompt, state] {
   mut state = init_session $state
   mut history: any = $state.history
   mut input: any = $initial_prompt
@@ -423,7 +453,7 @@ export def --env chat [initial_prompt, state] {
       let input_message = $input | as_message
       append_session $state $input_message
 
-      let response = (generate_content $state $input)
+      let response = (generate_content $input $state)
       $input = ""
       # Append the previous call in the history
       $state.history = $state.history | append $input_message
@@ -433,51 +463,45 @@ export def --env chat [initial_prompt, state] {
       }
 
       if ("choices" in $response) {
-        let message = $response | get choices.0.message
+        let choice = $response | get choices.0
+        let finish_reason = $choice | get finish_reason
+        let message = $choice | get message
         $state.history = $state.history | append $message
         append_session $state $message
+        let content = $message | get content
 
         print -rn $"\r"
-        print ($message | get content)
-        mut tool_calls = []
-        if (($message | get content) | is-not-empty) {
-          $state.result = $message | get content
-          # Hack here - tool calls can be found in the content.
-          # PArse the content and get the tool calls
-          try {
-            let pot_tool_calls = ($message | from json)
-            if ($pot_tool_calls | describe) == "table" {
-              $tool_calls = $pot_tool_calls
-            }
-          }
+
+        if ($content | is-not-empty) {
+          print $content
+          $state.result = $content
+          $state = ($content | set-exit $state)
         }
-        if (($message | get content) | str ends-with "DONE") and ($state.parent | is-not-empty) {
-          $state.exit = true
-        }
+
         if ($state.config.usage) {
           print ($response | get usage)
         }
-        if ("tool_calls" in $message) {
-          # here we just get the 1st tool call.
-          $tool_calls = ($message | get tool_calls)
-        }
 
-        if ($tool_calls | is-not-empty) {
+        if ($finish_reason == "tool_calls") {
+          # here we just get the 1st tool call.
+          let tool_calls = ($message | get tool_calls)
           let immut_state = $state
-          if ($tool_calls | is-not-empty) {
-            $input = ($tool_calls | each { exec_tool_call $immut_state })
-            # store the result here. If we are doing an agentic call, then the input will be passed back to the agent
-            # which will in turn respond with DONE, if complete. At that point, we will return the $state with the previous result.
-            # We could embed also the whole history for the agent call (query, responses) but that seems wasteful!
-            $state.result = $input
-            # it is unlikely the tool call will return a DONE, but let's exit anyway
-            if ($input | is-string) and ($input | str ends-with "DONE") and ($state.parent | is-not-empty) {
-              $state.exit = true
-            }
-          }
+          let result = ($tool_calls | each { |i| $i | exec_tool_call $immut_state })
+          # store the result here. If we are doing an agentic call, then the input will be passed back to the agent
+          # which will in turn respond with DONE, if complete. At that point, we will return the $state with the previous result.
+          # We could embed also the whole history for the agent call (query, responses) but that seems wasteful!
+          $state.result = $result
+          # it is unlikely the tool call will return a DONE, but let's exit anyway
+          $state = ($result | set-exit $state)
+          # set the result of the tools call as the next input
+          $input = $result
         }
       } else {
+        print "---- Unexpected response ----"
+        print ""
         print ($response | to json -r)
+        print ""
+        print "---- Unexpected response ----"
       }
     }
 
@@ -502,22 +526,7 @@ def exec_tool_call [state] {
   }
 }
 
-const default_state = {
-  exit: false,
-  parent: {},
-  result: {},
-  config: {
-    debug: false,
-    usage: false
-    force_overwrite: false,
-    always_exec: false,
-    agent: "",
-    model: "mistral-small-latest",
-  }
-  history: []
-}
-
-export def --env main [--model: string = "", prompt: string = "", state = $default_state] {
+export def --env main [--model: string = "", prompt?: string = "", state = $default_state] {
   mut state = $state
   let input = $in
   if (($input | describe) == "string") {
