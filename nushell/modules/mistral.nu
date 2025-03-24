@@ -1,4 +1,6 @@
 use asana.nu
+use spin.nu
+
 const default_state = {
   exit: false,
   parent: {},
@@ -10,6 +12,7 @@ const default_state = {
     always_exec: false,
     agent: "",
     model: "mistral-small-latest",
+    agents: []
   }
   history: []
 }
@@ -32,13 +35,12 @@ export def get_models [] {
   http get --headers (headers) "https://api.mistral.ai/v1/models"
 }
 
-const max_retry = 0
+def get_agents [state] {
+  return ($state.config.agents | each { |agent| $agent.name })
+}
 
-def get_agents [] {
-  if ("MISTRAL_AGENTS" in $env) {
-    return $env.MISTRAL_AGENTS
-  }
-  []
+def get_agent [state, name] {
+  return ($state.config.agents | filter { |agent| $agent.name == $name } | first)
 }
 
 def get_current_runtime [state] {
@@ -63,22 +65,6 @@ def get_prompt [state, prompt: string = ""] {
     $parent_state = $parent_state.parent
   }
   $"(ansi rb)Mistral (ansi green)\(($parent_prompt)(get_current_runtime $state)\)(ansi reset)(ansi blue)> (ansi reset)($prompt)"
-}
-
-def retry [block: closure, max = $max_retry] {
-  mut cnt = $max
-  loop {
-    if ($cnt == 0) {
-      return (do  $block)
-    }
-    try {
-      return (do $block)
-    } catch {
-      |err| print $"Error: ($err.msg)"
-    }
-    $cnt = ($cnt - 1)
-    print $"Retrying... ($cnt)/($max)"
-  }
 }
 
 def build_history [state = []] {
@@ -373,12 +359,15 @@ def --env handle_command [state, text] {
       $state.config.agent = ""
     }
     '\agent' => {
-      let new_agent = ((get_agents | append "no agent") | input list)
+      let new_agent = (((get_agents $state) | append "no agent") | input list)
       if ($new_agent == "no agent") {
         $state.config.agent = ""
       } else {
-        $state.config.agent = $new_agent
+        $state.config.agent = (get_agent $state $new_agent) | get id
       }
+    }
+    '\config' => {
+      print $state.config
     }
     '\agent off' => {
       $state.config.agent = ""
@@ -449,11 +438,12 @@ def --env chat [initial_prompt, state] {
       $state = (handle_command $state $input)
       $input = ""
     } else {
-      print -rn $"- running...."
+      let s = (spin start spinner)
       let input_message = $input | as_message
       append_session $state $input_message
 
       let response = (generate_content $input $state)
+      job kill $s
       $input = ""
       # Append the previous call in the history
       $state.history = $state.history | append $input_message
@@ -526,8 +516,22 @@ def exec_tool_call [state] {
   }
 }
 
-export def --env main [--model: string = "", prompt?: string = "", state = $default_state] {
+def load_config [state, config_path = "~/.config/mistral.nuon"] {
+  let full_path = $config_path | path expand
+  if not ($full_path | path exists) {
+    return $state
+  }
   mut state = $state
+  try {
+    $state.config = ($state.config | merge (open $full_path))
+  } catch { |err|
+    print $"Error loading config from ($config_path): ($err.msg)"
+  }
+  $state
+}
+
+export def --env main [--model: string = "", prompt?: string = "", state = $default_state] {
+  mut state = (load_config $state)
   let input = $in
   if (($input | describe) == "string") {
     $state.history = $input | history_from_stream
