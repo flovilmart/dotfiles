@@ -17,6 +17,8 @@ const default_state = {
   history: []
 }
 
+const DEFAULT_CONFIG_PATH = "~/.config/mistral.nuon"
+
 # Pricing: https://mistral.ai/products/la-plateforme#pricing
 const models = [
   "mistral-small-latest" # not expensive
@@ -369,6 +371,13 @@ def --env handle_command [state, text] {
     '\config' => {
       print $state.config
     }
+    '\config save' => {
+      let config_path = $DEFAULT_CONFIG_PATH | path expand
+      if not ($config_path | path exists) or (confirm "Config file already exists. Do you want to overwrite it? (y/n)") {
+        print
+        ($state.config | to nuon --indent 2) | save -f $config_path
+      }
+    }
     '\agent off' => {
       $state.config.agent = ""
     }
@@ -516,7 +525,7 @@ def exec_tool_call [state] {
   }
 }
 
-def load_config [state, config_path = "~/.config/mistral.nuon"] {
+def load_config [state, config_path = $DEFAULT_CONFIG_PATH] {
   let full_path = $config_path | path expand
   if not ($full_path | path exists) {
     return $state
