@@ -22,7 +22,7 @@ export def edit [] {
   let input = $in
   let tmp = (mktemp -t nu-edit.XXXXXX)
   $input | save $tmp -f
-  nvim $tmp
+  nu -c $"($env.EDITOR) ($tmp)"
 
   open $tmp
 }
