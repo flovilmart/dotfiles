@@ -17,3 +17,12 @@ export def "columns match" [condition] {
   let real_block = $block
   $in | transpose key value | where { |it| do $block $it } | transpose --header-row | first
 }
+
+export def edit [] {
+  let input = $in
+  let tmp = (mktemp -t nu-edit.XXXXXX)
+  $input | save $tmp -f
+  nvim $tmp
+
+  open $tmp
+}
