@@ -164,18 +164,18 @@ export def "ai function declarations" [] {
       function: {
         name: "asana_api_get"
         description: "
-makes   a get api call on the asana API.
+makes a get api call on the asana API.
 
-Notabl  e APIs:
+Notable APIs:
 
-When n  eeding to pass a workspace ID add it to the url query parameters in the form workspace=ASANA_WORKSPACE_ID
-When n  eeding to pass assignee, always use the global id (GID) of the user unless specified othewise.
+When needing to pass a workspace ID add it to the url query parameters in the form workspace=ASANA_WORKSPACE_ID
+When needing to pass assignee, always use the global id (GID) of the user unless specified othewise.
 
-GET ti  me period: https://app.asana.com/api/1.0/time_periods
-Search  ing for tasks: https://app.asana.com/api/1.0/workspaces/ASANA_WORKSPACE_ID/tasks/search
+GET time period: https://app.asana.com/api/1.0/time_periods
+Searching for tasks: https://app.asana.com/api/1.0/workspaces/ASANA_WORKSPACE_ID/tasks/search
 
-GET us  er: https://app.asana.com/api/1.0/users/USER_GID (USER_GID is the user's global id)
-GET th  e current user: https://app.asana.com/api/1.0/users/me
+GET user: https://app.asana.com/api/1.0/users/USER_GID (USER_GID is the user's global id)
+GET the current user: https://app.asana.com/api/1.0/users/me
 "
         parameters: {
           type: "object"

@@ -239,7 +239,10 @@ export def generate_content [input, state = $default_state] {
   }
   try {
     http post -t application/json -e -H (headers) $url $final_body
-  } catch { |err| $err.msg }
+  } catch { |err|
+    print "error..."
+    "Error making http call"
+  }
 }
 
 def confirm [msg: string = "Confirm?"] {
@@ -323,8 +326,9 @@ def history_from_stream [] {
   }
 }
 
-def --env handle_command [state, text] {
+def --env handle_command [state] {
   mut state = $state
+  let text = $in
   match $text {
     '\dump' => {
       $env.MISTRAL_STATE = $state
@@ -437,22 +441,29 @@ def --env chat [initial_prompt, state] {
   loop {
     # Check if we have a prompt, if not, ask for one
     if ($input | is-empty) {
-      # TODO: Listen for up / down keys to cycle through previous queries
       $input = (input $"(get_prompt $state)" | str trim)
     } else if ($input | is-string) {
       print (get_prompt $state $input)
     }
-    if (($input | str index-of '\') == 0) {
+    if ($input | is-string) and (($input | str index-of '\') == 0) {
       # handle command!
-      $state = (handle_command $state $input)
+      $state = ($input | handle_command $state)
       $input = ""
     } else {
       let s = (spin start spinner)
       let input_message = $input | as_message
       append_session $state $input_message
 
-      let response = (generate_content $input $state)
+      mut response = {};
+      let prompt_input = $input
+      let prompt_state = $state
+      $response = do -c -i {
+        generate_content $prompt_input $prompt_state
+      }
       job kill $s
+      if ($response | is-empty) {
+        $response = {}
+      }
       $input = ""
       # Append the previous call in the history
       $state.history = $state.history | append $input_message
@@ -496,11 +507,11 @@ def --env chat [initial_prompt, state] {
           $input = $result
         }
       } else {
-        print "---- Unexpected response ----"
-        print ""
-        print ($response | to json -r)
-        print ""
-        print "---- Unexpected response ----"
+        #   print "---- Unexpected response ----"
+        #   print ""
+        #   print ($response | to json -r)
+        #   print ""
+        #   print "---- Unexpected response ----"
       }
     }
 
