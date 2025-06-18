@@ -42,7 +42,7 @@ def get_agents [state] {
 }
 
 def get_agent [state, name] {
-  return ($state.config.agents | filter { |agent| $agent.name == $name } | first)
+  return ($state.config.agents | where { |agent| $agent.name == $name } | first)
 }
 
 def get_current_runtime [state] {
@@ -270,7 +270,7 @@ def exec_function_call [tool_call, state] {
       #   return $res | get result
       # }
       _ => {
-        let func = (all_tools | filter { |f| $f.function.name == $name })
+        let func = (all_tools | where { |f| $f.function.name == $name })
 
         if ($func | is-empty) {
           return { "error": "unknown function" }
@@ -300,7 +300,7 @@ def is-command [command] {
 }
 
 def param-from-command [val, command] {
-  $val | split row $command | each { str trim } | filter { is-not-empty }
+  $val | split row $command | each { str trim } | where { is-not-empty }
 }
 
 def --env init_session [state] {
@@ -441,7 +441,7 @@ def --env chat [initial_prompt, state] {
   loop {
     # Check if we have a prompt, if not, ask for one
     if ($input | is-empty) {
-      $input = (input $"(get_prompt $state)" | str trim)
+      $input = (input --history-file ~/.mistral/history $"(get_prompt $state)" | str trim)
     } else if ($input | is-string) {
       print (get_prompt $state $input)
     }

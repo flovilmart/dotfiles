@@ -38,7 +38,7 @@ export def verify_signature [token: string, jwks?: string] {
   let keys = fetch_keys $jwks
 
   let kid = $parsed_jwt.header.kid
-  let key = ($keys | filter { |k| $k.kid == $kid and $k.use == 'sig' }).0
+  let key = ($keys | where { |k| $k.kid == $kid and $k.use == 'sig' }).0
 
   # ensure we have a single key matching!
   assert ($key != null)

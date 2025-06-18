@@ -236,7 +236,7 @@ export def --env chat [--system-instruction (-i): string = "", initial_prompt, g
       # print $func_res
     },
     $val if ($val | str starts-with '\save') => {
-      mut param_list = $val | split row '\save' | each { str trim } | filter { is-not-empty }
+      mut param_list = $val | split row '\save' | each { str trim } | where { is-not-empty }
       mut file_name = ""
       if ($param_list | is-empty) {
         $file_name = $"gemini-session-(^date +%s).json"
