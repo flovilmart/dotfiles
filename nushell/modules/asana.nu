@@ -156,6 +156,11 @@ export def typeahead [type: string, query: string] {
   api get $"($url)?resource_type=($type)&query=($query)"
 }
 
+export def export_resource [type: string, id: string] {
+  let url = $"https://app.asana.com/api/1.0/exports/resource"
+  api post $url { data: { export_request_parameters: { resource_type: $type, gid: $id } } }
+}
+
 
 export def "ai function declarations" [] {
   return [
@@ -271,8 +276,27 @@ Update goal: https://app.asana.com/api/1.0/goals/RESOURCE_ID
           }
         }
       }
+    } {
+      type: "function"
+      function: {
+        name: "asana_export_resource"
+        description: "Export any arbitrary resource from Asana. The export is generated asynchronously and emailed to you when ready.",
+        parameters: {
+          type: "object",
+          properties: {
+            "type": {
+              "type": "string",
+              "description": "The type of resource to search for"
+            },
+            "query": {
+              "type": "string",
+              "description": "The query to search for"
+            }
+          }
+        }
+      }
       handler: { |args, state|
-        return (typeahead $args.type $args.query)
+        return (export_resource $args.type $args.query)
       }
     }
   ]
