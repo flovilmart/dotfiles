@@ -1,5 +1,5 @@
 use asana.nu
-use spin.nu
+# use spin.nu
 
 const default_state = {
   exit: false,
@@ -12,6 +12,7 @@ const default_state = {
     always_exec: false,
     agent: "",
     model: "mistral-small-latest",
+    system_prompt: "~/.mistral/system_prompt.txt",
     agents: []
   }
   history: []
@@ -229,7 +230,13 @@ export def generate_content [input, state = $default_state] {
     $body.model = $state.config.model
   }
   let url = $"https://api.mistral.ai/v1/($api)/completions"
-  $body.messages = build_history $state.history
+  if ($state.config.system_prompt | path exists) {
+    let prompt = (open -r ($state.config.system_prompt | path expand))
+    if ($prompt | is-not-empty) {
+      $body.messages = $body.messages | append (content_block "system" $prompt)
+    }
+  }
+  $body.messages = $body.messages | append (build_history $state.history)
 
   $body.messages = $body.messages | append ($input | as_message)
 
@@ -240,6 +247,7 @@ export def generate_content [input, state = $default_state] {
   try {
     http post -t application/json -e -H (headers) $url $final_body
   } catch { |err|
+    print $err
     print "error..."
     "Error making http call"
   }
@@ -450,17 +458,28 @@ def --env chat [initial_prompt, state] {
       $state = ($input | handle_command $state)
       $input = ""
     } else {
-      let s = (spin start spinner)
+      # let s = (spin start spinner)
       let input_message = $input | as_message
       append_session $state $input_message
 
       mut response = {};
       let prompt_input = $input
       let prompt_state = $state
-      $response = do -c -i {
-        generate_content $prompt_input $prompt_state
+
+      let generate_job = job spawn {
+        let dat = job recv
+        print $dat
+        let res = generate_content $dat.0 $dat.1
+        $res | job send 0
       }
-      job kill $s
+      [$input $state] | job send $generate_job
+
+      print "GENERATING"
+      $response = job recv
+      # job kill $generate_job
+
+      # $response = generate_content $prompt_input $prompt_state
+      # job kill $s
       if ($response | is-empty) {
         $response = {}
       }
