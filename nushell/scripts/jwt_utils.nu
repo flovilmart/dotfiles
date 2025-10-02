@@ -7,7 +7,10 @@ export def jwt [token?: string] {
   let token = default_value $token $in
   let parts = $token | split row "."
   assert (($parts | length) >= 2) "expected to have 3 components separated by ."
-  let header = $parts.0 | b64_to_record
+  mut header = $parts.0
+  try {
+    $header = $parts.0 | b64_to_record
+  } catch {}
   let payload = $parts.1 | b64_to_record
   mut sig = null
   if ($parts | length) == 3 {
