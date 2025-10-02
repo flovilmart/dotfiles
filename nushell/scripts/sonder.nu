@@ -2,6 +2,13 @@ export def "sonder codeartifact_auth_token" [] {
   aws --profile sonder-dev/codeartifact-readonly codeartifact get-authorization-token --domain sonder-prod --domain-owner 111664848662 --region us-east-1 --query authorizationToken --output text
 }
 
+export def "sonder find secret" [value: string] {
+  sonder list secrets | split row "\n" | each { |s|
+    print $s;
+    [$s, (sonder get secret $s | from json | transpose | find $value)]
+  } | where { |e| ($e.1 | length) != 0 }
+}
+
 export def "sonder relogin" [] {
   sonder aws signout
   sonder setup
@@ -29,8 +36,8 @@ export def --env "sonder config aws" [profile?: string] {
   }
 }
 
-export def "sonder proxy db" [] {
-  let DB_HOST = "shared-aurora-pg-staging.cluster-c0kopnruetbd.us-east-1.rds.amazonaws.com"
+export def "sonder proxy db" [db_host?: string] {
+  let DB_HOST = $db_host | default "shared-aurora-pg-staging.cluster-c0kopnruetbd.us-east-1.rds.amazonaws.com"
   let USER_SOCAT = $"($env.USER)-socat"
   kubectl run $USER_SOCAT --image=marcnuri/port-forward --env=$"REMOTE_HOST=($DB_HOST)" --env="REMOTE_PORT=5432" --env="LOCAL_PORT=5433" ;
   kubectl wait --for=condition=ready --timeout=60s pod $USER_SOCAT;
