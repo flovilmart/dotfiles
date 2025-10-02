@@ -10,6 +10,7 @@
 [push]
 	default = current
 	recurseSubmodules = check
+  noVerify = true
 [http]
 	postBuffer = 52428800
 [credential]
@@ -42,10 +43,10 @@
 	st = status
   main = !git co main && git pull origin main
 	pr-web = !gh pr view -w
-	pr = !(gh pr create -f || echo "OK!") && yarn update:changelog && git push && gh pr view -w
+	pr = !(gh pr create -f || exit 0) &&  gh pr view -w
 	pr-view = !gh pr view -w
   hub = !gh
-  fix = !git commit --amend --no-edit && git push -f
+  fix = !git commit --amend --no-edit && git push -f --no-verify
 [filter "lfs"]
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
