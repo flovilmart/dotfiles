@@ -15,7 +15,7 @@ def kswitch [dest] {
   let envs = (sonder aws config $dest)
   let namespaces = [["env", "namespace"]; ["staging", "preview"] ["prod", "production"]]
 
-  let ns = (echo $namespaces | where env == $dest | get namespace --ignore-errors)
+  let ns = (echo $namespaces | where env == $dest | get namespace -o)
   if (($ns | empty?) != true) {
     kcsn $ns
   }

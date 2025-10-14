@@ -43,6 +43,7 @@ $env.PATH = (
         ($env.HOME | path join ".cargo" "bin"),
         ($env.HOME | path join ".rbenv" "shims"),
         '/opt/homebrew/bin',
+        '/opt/homebrew/sbin',
         '/usr/local/bin',
         (
             $env.ANDROID_SDK_ROOK
