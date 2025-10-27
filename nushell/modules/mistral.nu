@@ -160,7 +160,15 @@ def fs_functions [] {
         }
       }
       handler:  { |args, state|
-        return (ls $args.path)
+        if (not ($args.path | path exists)) {
+          return { "error": "path does not exist" }
+        }
+        try {
+          return (ls $args.path)
+        } catch { |err|
+          print $"Error listing directory: ($err.msg)"
+          return { "error": $err }
+        }
       }
     },
     { type: "function",

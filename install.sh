@@ -1,14 +1,23 @@
 #!/bin/bash
 
-set -ex
 all() {
+  base
+  langs
+}
+
+base()  {
   brew
   brew_bundle
-  node
-  ruby
   dotfiles
   vim
   tmux_plugins
+  nushell
+  starship
+}
+
+langs()  {
+  node
+  ruby
 }
 
 dotfiles() {
@@ -67,8 +76,8 @@ brew_bundle_ruby() {
 
 ruby() {
   brew_bundle_ruby
-	rbenv install -s 2.6.5
-	rbenv global 2.6.5
+	rbenv install -s 3.4.5
+	rbenv global 3.4.5
 	gem install rails --version=6.0.1 --no-document
 }
 
@@ -106,17 +115,6 @@ nushell() {
 
 starship() {
   ln -sfn $(pwd)/starship.toml ${HOME}/.config/starship.toml
-}
-
-alanuship() {
-	which brew && brew install alacritty nushell starship
-  mkdir -p ${HOME}/.config
-	mkdir -p ${HOME}/.config/alacritty
-	ln -sfn $(pwd)/alacritty.yml ${HOME}/.config/alacritty/
-
-  starship
-  # Copy the nushell config
-  nushell
 }
 
 while (("$#")) ; do
