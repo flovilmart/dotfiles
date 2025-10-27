@@ -9,10 +9,10 @@ base()  {
   brew
   brew_bundle
   dotfiles
-  vim
-  tmux_plugins
   nushell
   starship
+  vim
+  tmux_plugins
 }
 
 langs()  {
@@ -88,7 +88,9 @@ node() {
 }
 
 vim() {
-  cd $(pwd)/vimrc && sh ./install.sh all
+  pushd $(pwd)/vimrc;
+  sh ./install.sh all
+  popd;
 }
 
 tmux_plugins() {
