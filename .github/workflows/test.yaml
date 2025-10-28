@@ -14,7 +14,7 @@ jobs:
           private-key: ${{ secrets.SSH_GITHUB_PPK }}
           private-key-name: github-ppk
       - name: Install all
-        run: sh ./install.sh base
+        run: sh ./install.sh
   docker:
     if: false
     name: Docker build

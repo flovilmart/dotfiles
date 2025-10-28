@@ -2,7 +2,9 @@
 
 try {
   open ~/.config/nu.env.toml | get env | load-env
-} catch {}
+} catch {
+  echo "unable to load ~/.config/nu.env.toml"
+}
 
 def starship_prompt [short_prompt = false] {
   let dur = $env.CMD_DURATION_MS;

@@ -121,6 +121,11 @@ starship() {
   ln -sfn $(pwd)/starship.toml ${HOME}/.config/starship.toml
 }
 
+# Default to running all if no args are given
+if [ "$#" -eq 0 ]; then
+    set -- all
+fi
+
 while (("$#")) ; do
     echo "Running $1"
     $1
