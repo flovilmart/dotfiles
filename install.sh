@@ -74,7 +74,7 @@ submodules() {
 }
 
 homebrew() {
-	test -x ${HOMEBREW_PREFIX}/bin/brew || curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh | bash
+	test -x ${HOMEBREW_PREFIX}/bin/brew || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 }
 
 brew_bundle() {
