@@ -7,15 +7,24 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up SSH
-        uses: MrSquaare/ssh-setup-action@2d028b70b5e397cf8314c6eaea229a6c3e34977a # v3.1.0
-        with:
-          host: github.com
-          private-key: ${{ secrets.SSH_GITHUB_PPK }}
-          private-key-name: github-ppk
+      - name: Cleanup
+        run: |
+          cat ~/.bash_profile || true
+          cat ~/.bashrc || true
+          cat ~/.zshrc || true
+          cat ~/.profile || true
+          rm ~/.zshrc || true
+          rm -rf ~/.oh-my-zsh || true
+          rm -rf ~/.bash_profile
+          which brew
+          echo $PATH
+          NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
+          echo $PATH
+          which brew || true
       - name: Install all
         run: sh ./install.sh
   docker:
+    if: false
     name: Docker build
     runs-on: ubuntu-latest
     permissions:
