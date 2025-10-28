@@ -2,6 +2,10 @@
 
 all() {
   base
+}
+
+extras() {
+  base
   langs
 }
 
