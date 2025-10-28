@@ -3,4 +3,3 @@ brew "docker"
 brew "helm"
 brew "kubernetes-cli", link: false
 brew "tfenv"
-brew "vault"
