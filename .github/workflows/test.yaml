@@ -10,6 +10,12 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Set up SSH
+        uses: MrSquaare/ssh-setup-action@2d028b70b5e397cf8314c6eaea229a6c3e34977a # v3.1.0
+        with:
+          host: github.com
+          private-key: ${{ secrets.SSH_GITHUB_PPK }}
+          private-key-name: github-ppk
       - name: Install all
         run: sh ./install.sh
   docker:
