@@ -61,8 +61,8 @@ brew() {
 }
 
 brew_bundle() {
-	brew bundle
-	brew bundle --file=Brewfile.cloud
+	brew bundle --verbose
+	brew bundle --verbose --file=Brewfile.cloud
 }
 
 brew_bundle_lang() {
