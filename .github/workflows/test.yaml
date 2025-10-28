@@ -13,8 +13,6 @@ jobs:
           host: github.com
           private-key: ${{ secrets.SSH_GITHUB_PPK }}
           private-key-name: github-ppk
-      - name: Cleanup Brew just to make sure
-        run: NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
       - name: Install all
         run: sh ./install.sh
   docker:

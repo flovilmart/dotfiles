@@ -3,6 +3,7 @@ alias kcuc = kubectl config use-context
 alias kgp = kubectl get pods
 alias kcsn = kubectl config set-context --current --namespace
 alias vi = nvim
+alias vim = nvim
 
 def to_records [env_vars] {
   echo $env_vars | grep export | sed s/export//g | split row "\n" | each { |it| $it | str trim | split column "=" name value | first } | reduce -f {} { |it, acc| $acc | upsert $it.name $it.value }
