@@ -7,7 +7,7 @@ all() {
 }
 
 base()  {
-  brew
+  homebrew
   brew_bundle
   dotfiles
   nushell
@@ -56,7 +56,7 @@ submodules() {
   fi
 }
 
-brew() {
+homebrew() {
 	which brew || curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh | bash
 }
 
