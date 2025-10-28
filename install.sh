@@ -7,6 +7,7 @@ all() {
 }
 
 base()  {
+  submodules
   homebrew
   brew_bundle
   dotfiles
