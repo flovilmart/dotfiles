@@ -67,12 +67,12 @@ brew_bundle() {
 }
 
 brew_bundle_lang() {
-  brew
+  homebrew
 	brew bundle --file=Brewfile.lang
 }
 
 brew_bundle_ruby() {
-  brew
+  homebrew
 	brew bundle --file=Brewfile.ruby
 }
 
