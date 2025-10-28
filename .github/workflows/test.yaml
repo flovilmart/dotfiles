@@ -1,26 +1,15 @@
 on: push
 env:
   IMAGE_NAME: flovilmart/dev-env
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   macos:
     name: MacOS build
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Cleanup
-        run: |
-          cat ~/.bash_profile || true
-          cat ~/.bashrc || true
-          cat ~/.zshrc || true
-          cat ~/.profile || true
-          rm ~/.zshrc || true
-          rm -rf ~/.oh-my-zsh || true
-          rm -rf ~/.bash_profile
-          which brew
-          echo $PATH
-          NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
-          echo $PATH
-          which brew || true
       - name: Install all
         run: sh ./install.sh
   docker:
