@@ -16,7 +16,10 @@ jobs:
       - name: Install all
         run: sh ./install.sh
       - name: Test Neovim
-        run: nu -c "vi --version | find 'NVIM v0.11' | get 0"
+        run: |
+          nu -c "vi --version"
+          nu -c "nvim --version"
+          nu -c "vi --version | find 'NVIM v0.11' | get 0"
   docker:
     name: Docker build
     runs-on: ubuntu-latest
