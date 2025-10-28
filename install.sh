@@ -1,6 +1,5 @@
 #!/bin/bash
 
-set -ex
 all() {
   base
   langs
