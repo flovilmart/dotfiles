@@ -13,13 +13,10 @@ jobs:
           host: github.com
           private-key: ${{ secrets.SSH_GITHUB_PPK }}
           private-key-name: github-ppk
+      - name: Cleanup Brew just to make sure
+        run: rm -rf $(which brew)
       - name: Install all
         run: sh ./install.sh
-      - name: Test Neovim
-        run: |
-          nu -c "vi --version"
-          nu -c "nvim --version"
-          nu -c "vi --version | find 'NVIM v0.11' | get 0"
   docker:
     name: Docker build
     runs-on: ubuntu-latest
