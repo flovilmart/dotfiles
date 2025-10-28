@@ -1,5 +1,18 @@
 #!/bin/bash
 
+UNAME_MACHINE="$(/usr/bin/uname -m)"
+
+if [[ "${UNAME_MACHINE}" == "arm64" ]]
+then
+  # On ARM macOS, this script installs to /opt/homebrew only
+  HOMEBREW_PREFIX="/opt/homebrew"
+  HOMEBREW_REPOSITORY="${HOMEBREW_PREFIX}"
+else
+  # On Intel macOS, this script installs to /usr/local only
+  HOMEBREW_PREFIX="/usr/local"
+  HOMEBREW_REPOSITORY="${HOMEBREW_PREFIX}/Homebrew"
+fi
+
 all() {
   base
 }
@@ -61,22 +74,22 @@ submodules() {
 }
 
 homebrew() {
-	which brew || curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh | bash
+	test -x ${HOMEBREW_PREFIX}/bin/brew || curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh | bash
 }
 
 brew_bundle() {
-	brew bundle --verbose
-	brew bundle --verbose --file=Brewfile.cloud
+	${HOMEBREW_PREFIX}/bin/brew bundle --verbose
+	${HOMEBREW_PREFIX}/bin/brew bundle --verbose --file=Brewfile.cloud
 }
 
 brew_bundle_lang() {
   homebrew
-	brew bundle --file=Brewfile.lang
+	${HOMEBREW_PREFIX}/bin/brew bundle --file=Brewfile.lang
 }
 
 brew_bundle_ruby() {
   homebrew
-	brew bundle --file=Brewfile.ruby
+	${HOMEBREW_PREFIX}/bin/brew bundle --file=Brewfile.ruby
 }
 
 ruby() {
