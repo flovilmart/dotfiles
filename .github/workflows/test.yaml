@@ -19,7 +19,6 @@ jobs:
       - name: Install all
         run: sh ./install.sh
   docker:
-    if: false
     name: Docker build
     runs-on: ubuntu-latest
     permissions:
