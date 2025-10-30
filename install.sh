@@ -46,7 +46,8 @@ dotfiles() {
 	done;
 	mkdir -p ${HOME}/.config/ghostty;
 	ln -sfn $(pwd)/ghostty/config ${HOME}/.config/ghostty/config
-	ln -sfn $(pwd)/ghostty/themes ${HOME}/.config/ghostty/themes
+  ln -sfn $(pwd)/ghostty/themes ${HOME}/.config/ghostty/themes
+	ln -sfn $(pwd)/ghostty/shaders ${HOME}/.config/ghostty/shaders
 }
 
 fix_nu_path() {

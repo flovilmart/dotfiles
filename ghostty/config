@@ -1,3 +1,4 @@
 font-family = "FiraMono Nerd Font Mono"
 font-style = "Medium"
 theme = hello_flo
+custom-shader = shaders/cursor_wrap.glsl
