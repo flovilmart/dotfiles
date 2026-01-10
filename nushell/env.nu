@@ -17,6 +17,16 @@ def starship_prompt [short_prompt = false] {
   }
 }
 
+def "from env" []: string -> record {
+  lines
+    | split column '#'
+    | get column1
+    | where {($in | str length) > 0}
+    | parse "{key}={value}"
+    | update value {str trim -c '"'}
+    | transpose -r -d
+}
+
 $env.PROMPT_COMMAND = {
   starship_prompt
 }
@@ -44,6 +54,7 @@ $env.PATH = (
         ($env.HOME | path join ".krew" "bin"),
         ($env.HOME | path join ".cargo" "bin"),
         ($env.HOME | path join ".rbenv" "shims"),
+        ($env.HOME | path join ".local" "bin"),
         '/opt/homebrew/bin',
         '/opt/homebrew/sbin',
         '/usr/local/bin',

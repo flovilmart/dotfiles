@@ -9,6 +9,7 @@ $git_metrics\
 $git_status \
 $aws\
 $kubernetes\
+$terraform\
 $line_break\
 $time$character"""
 
@@ -27,6 +28,9 @@ disabled = false
 disabled = false
 style = "blue"
 format = '(\[$symbol[$context:$namespace]($style)\])'
+
+[terraform]
+disabled = false
 
 # [kubernetes.context_aliases]
 # "dev.local.cluster.k8s" = "dev"

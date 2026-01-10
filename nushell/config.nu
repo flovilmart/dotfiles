@@ -104,3 +104,5 @@ use utils.nu *
 use asana.nu
 use gemini.nu
 use mistral.nu
+use gh.nu
+use terraform.nu

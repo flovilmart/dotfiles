@@ -26,3 +26,7 @@ export def edit [] {
 
   open $tmp
 }
+
+export def no_empty [] {
+  return $in | where { |it| ($it | is-empty) == false }
+}

@@ -1,3 +1,5 @@
+# vim: ft=ghostty
+
 background = 212121
 foreground = 718384
 background-opacity = 0.99

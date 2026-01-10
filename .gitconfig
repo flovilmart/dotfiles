@@ -44,6 +44,7 @@
   main = !git co main && git pull origin main
 	pr-web = !gh pr view -w
 	pr = !(gh pr create -f || exit 0) &&  gh pr view -w
+	prd = !(gh pr create -d -f || exit 0) &&  gh pr view -w
 	pr-view = !gh pr view -w
   hub = !gh
   fix = !git commit --amend --no-edit && git push -f --no-verify

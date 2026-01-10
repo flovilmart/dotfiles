@@ -23,6 +23,8 @@ const DEFAULT_CONFIG_PATH = "~/.config/mistral.nuon"
 # Pricing: https://mistral.ai/products/la-plateforme#pricing
 const models = [
   "mistral-small-latest" # not expensive
+  "magistral-small-latest" # not expensive
+  "magistral-medium-latest" # not expensive
   "codestral-latest" # not very expensive
   "mistral-large-latest" # very expensive!
   "pixtral-large-latest"
@@ -510,7 +512,19 @@ def --env chat [initial_prompt, state] {
         print -rn $"\r"
 
         if ($content | is-not-empty) {
-          print $content
+          if ($content | describe) == "string" {
+            print $content
+          } else {
+            def print_content [c] {
+              let type = $c | get "type"
+              if $type == "text" {
+                print $"($type): ($c | get $type)"
+              } else {
+                ($c | get $type) | each { |d| print_content $d }
+              }
+            }
+            $content | each { |c| print_content $c }
+          }
           $state.result = $content
           $state = ($content | set-exit $state)
         }
@@ -577,8 +591,9 @@ def load_config [state, config_path = $DEFAULT_CONFIG_PATH] {
   $state
 }
 
-export def --env main [--model: string = "", prompt?: string = "", state = $default_state] {
+export def --env main [--model: string = "", --exit, prompt?: string = "", state = $default_state] {
   mut state = (load_config $state)
+  $state.exit = $exit
   let input = $in
   if (($input | describe) == "string") {
     $state.history = $input | history_from_stream
