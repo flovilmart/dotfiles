@@ -243,3 +243,114 @@ export def "set-variable" [key: string, value: string, --workspace: string, --ca
   }
 }
 
+export def "del-variable" [key: string, --workspace: string, --all = false, --force = false] {
+
+  # Delete a variable from Terraform Cloud
+  # If --all is true, delete all variables matching the key pattern
+  # If --force is true, skip confirmation prompt
+
+  let config = get_tf_cloud_config
+
+  if ($config.api_token | is-empty) {
+    echo "Error: TF_API_TOKEN environment variable not set"
+    return
+  }
+
+  let organization = get_current_organization
+
+  if ($organization | is-empty) {
+    echo "Could not determine organization"
+    return
+  }
+
+  # Get workspace ID
+  mut workspace_id = ""
+  try {
+    let workspace_response = http get --headers ($config.headers) ($config.base_url + "/organizations/" + $organization + "/workspaces/" + $workspace)
+    let workspace_data = $workspace_response | from json | get data
+    $workspace_id = ($workspace_data | get id)
+  } catch { |error|
+    echo "Error getting workspace ID: " + $error
+    return
+  }
+
+  # Get all variables to find the one(s) to delete
+  mut variables_to_delete = []
+  try {
+    let variables_response = http get --headers ($config.headers) ($config.base_url + "/workspaces/" + $workspace_id + "/vars")
+    let variables_data = $variables_response | from json | get data
+
+    if ($variables_data | is-empty) {
+      echo "No variables found in workspace: $workspace"
+      return
+    }
+
+    if ($all) {
+      # Delete all variables matching the key pattern
+      $variables_to_delete = ($variables_data | where { |var| $var.attributes.key =~ $key })
+    } else {
+      # Delete exact match
+      $variables_to_delete = ($variables_data | where { |var| $var.attributes.key == $key })
+    }
+
+    if (($variables_to_delete | length) == 0) {
+      echo "No variables found matching: $key"
+      return
+    }
+  } catch { |error|
+    echo "Error fetching variables: " + $error
+    return
+  }
+
+  # Show what will be deleted and ask for confirmation
+  if (($force) != true) {
+    echo ""
+    echo "WARNING: You are about to delete the following variables from workspace '$workspace':"
+    echo "---"
+
+    $variables_to_delete | each { |var|
+      let var_key = $var.attributes.key
+      let var_value = $var.attributes.value
+      let var_category = $var.attributes.category
+      let var_sensitive = $var.attributes.sensitive
+
+      echo "Key: $var_key"
+      echo "Category: $var_category"
+      if ($var_sensitive) {
+        echo "Value: [SENSITIVE - HIDDEN]"
+      } else {
+        echo "Value: $var_value"
+      }
+      echo "ID: $var.id"
+      echo "---"
+    }
+
+    echo ""
+    let confirm = (input "Are you sure you want to delete these variables? (y/N): ")
+
+    if ($confirm | str downcase) != "y" {
+      echo "Deletion cancelled."
+      return
+    }
+  }
+
+  # Delete each variable
+  echo ""
+  echo "Deleting variables..."
+
+  $variables_to_delete | each { |var|
+    let var_id = $var.id
+    let var_key = $var.attributes.key
+
+    try {
+      let response = http delete --headers ($config.headers) ($config.base_url + "/vars/" + $var_id)
+      echo "✓ Deleted variable: $var_key (ID: $var_id)"
+    } catch { |error|
+      echo "✗ Error deleting variable $var_key: " + $error
+    }
+  }
+
+  echo ""
+  echo "Variable deletion complete."
+}
+
