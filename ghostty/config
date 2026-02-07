@@ -1,10 +1,17 @@
 # vim: ft=ghostty
 
+
+custom-shader = ~/.config/ghostty/shaders/cursor_wrap.glsl
+# custom-shader = ~/.config/ghostty/shaders/drunkard.glsl
+# custom-shader = ~/.config/ghostty/shaders/starfield.glsl
+
+
+
 font-family = "FiraMono Nerd Font Mono"
 font-style = "Medium"
-theme = hello_flo
-custom-shader = shaders/cursor_wrap.glsl
-# theme = nord
+theme = catpuccin-macchiato.conf
+
+#theme = nord
 
 font-thicken = false
 window-colorspace = display-p3
