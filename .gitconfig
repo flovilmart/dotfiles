@@ -5,7 +5,7 @@
 	handle = flovilmart
 [core]
 	excludesfile = ~/.gitignore_global
-	ignorecase = true
+	ignorecase = false
   editor = nvim
 [push]
 	default = current
