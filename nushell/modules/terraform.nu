@@ -197,7 +197,7 @@ export def "organizations" [] {
   }
 }
 
-export def "set-variable" [key: string, value: string, --workspace: string, --category: string = "terraform", --hcl = false, --sensitive = false] {
+export def "set-variable" [key: string, value: string, --workspace: string, --category: string = "terraform", --hcl, --sensitive, --del] {
   # Set a variable in Terraform Cloud
 
   let config = get_tf_cloud_config
@@ -220,6 +220,12 @@ export def "set-variable" [key: string, value: string, --workspace: string, --ca
     return
   }
 
+  if $del {
+    try {
+      del-variable $key --workspace $workspace --force
+    } catch {}
+  }
+
   # Create variable payload
   let payload = {
     "data": {
@@ -236,14 +242,14 @@ export def "set-variable" [key: string, value: string, --workspace: string, --ca
 
   try {
     let response = http post --headers ($config.headers) --content-type application/json ($config.base_url + "/workspaces/" + $workspace_id + "/vars") $payload
-    print "Variable set successfully"
+    print $"Variable set successfully ($key)"
     $response | from json | get data
   } catch { |error|
-    print "Error setting variable: " + $error
+    print $"Error setting variable: ($key)" + $error
   }
 }
 
-export def "del-variable" [key: string, --workspace: string, --all = false, --force = false] {
+export def "del-variable" [key: string, --workspace: string, --all, --force] {
 
   # Delete a variable from Terraform Cloud
   # If --all is true, delete all variables matching the key pattern
