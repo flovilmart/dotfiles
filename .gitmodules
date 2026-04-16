@@ -7,3 +7,6 @@
 [submodule "nushell/plugins/nupm"]
 	path = nushell/plugins/nupm
 	url = https://github.com/nushell/nupm
+[submodule ".claude"]
+	path = .claude
+	url = https://github.com/flovilmart/dotclaude

@@ -31,6 +31,11 @@ base()  {
   starship
   vim
   tmux_plugins
+  claude
+}
+
+claude() {
+	ln -sfn $(pwd)/.claude ${HOME}/.claude
 }
 
 langs()  {
