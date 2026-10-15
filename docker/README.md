@@ -1,7 +1,7 @@
 # Slim dev environment for the agent workflow
 
 The image stays what it is: a shell layer (nushell, tmux, neovim, starship, git) plus the few
-binaries the agent workflow needs (`claude`, `gh`, `docker` CLI). Everything project-specific stays
+binaries the agent workflow needs (`claude` via the native installer, `gh`, `docker` CLI). Everything project-specific stays
 out of the image and comes from volumes or from the project's own compose file:
 
 | Need | Where it lives |
