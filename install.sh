@@ -38,6 +38,14 @@ claude() {
 	ln -sfn $(pwd)/.claude ${HOME}/.claude
 }
 
+# Agent workflow toolchain on macOS (see .claude/docs/agent-workflow.md):
+# Claude Code CLI, GitHub native stacks, pnpm through Volta.
+agent() {
+  command -v claude >/dev/null 2>&1 || ${HOMEBREW_PREFIX}/bin/brew install --cask claude-code
+  gh extension list 2>/dev/null | grep -q gh-stack || gh extension install github/gh-stack
+  VOLTA_FEATURE_PNPM=1 ~/.volta/bin/volta install pnpm
+}
+
 langs()  {
   node
   ruby
