@@ -10,6 +10,9 @@ RUN apk add tmux git neovim starship curl bash openssh-client
 #   libgcc libstdc++ ripgrep -> Claude Code runtime deps on musl (USE_BUILTIN_RIPGREP=0)
 # Node/pnpm are NOT in the image: Volta installs them into a volume on first start (docker/entrypoint.sh).
 RUN apk add github-cli docker-cli docker-cli-compose libgcc libstdc++ ripgrep
+# C toolchain for nvim-treesitter parsers (cc + linker + libc headers); without
+# musl-dev/binutils every parser compile fails with "posix_spawn failed".
+RUN apk add gcc musl-dev make
 
 # Claude Code through the native installer (the documented path for Alpine/musl).
 # It lands in /root/.local/bin and keeps itself updated inside a long-lived container.
