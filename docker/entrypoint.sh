@@ -15,8 +15,8 @@ DOTCLAUDE_DIR="${DOTCLAUDE_DIR:-/root/src/flovilmart/dotfiles/.claude}"
 CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-/root/.claude}"
 mkdir -p "$CLAUDE_DIR"
 if [ -d "$DOTCLAUDE_DIR" ]; then
-  # workflows: the coordinator's saved workflows; nu: shared nushell modules (the watcher's
-  # OAuth, the shell's `linear` command)
+  # workflows: the coordinator's saved workflows; nu: shared nushell modules (the test runner,
+  # the shell's `linear` command)
   for entry in agents skills hooks docs output-styles settings.json CLAUDE.md workflows nu; do
     if [ -e "$DOTCLAUDE_DIR/$entry" ]; then
       ln -sfn "$DOTCLAUDE_DIR/$entry" "$CLAUDE_DIR/$entry"
