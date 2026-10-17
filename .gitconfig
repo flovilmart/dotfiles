@@ -1,7 +1,6 @@
 [user]
 	name = Florent Vilmart
 	email = florent@flovilmart.com
-	signingkey = 4A0441A2
 	handle = flovilmart
 [core]
 	excludesfile = ~/.gitignore_global

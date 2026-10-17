@@ -47,3 +47,4 @@ bindkey "^E" end-of-line # Map end-of-line key in the same way as zprezto editor
 bindkey "^U" backward-kill-line
 
 . "$HOME/.local/bin/env"
+export PATH=/Users/florentvilmart/.config/nupm/scripts:/usr/local/opt/kubernetes-cli@1.22/bin:/Users/florentvilmart/.volta/bin:/Users/florentvilmart/.rd/bin:/Users/florentvilmart/go/bin:/Users/florentvilmart/.krew/bin:/Users/florentvilmart/.cargo/bin:/Users/florentvilmart/.rbenv/shims:/Users/florentvilmart/.local/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/Users/florentvilmart/Library/Android/sdk/platform_tools:/Users/florentvilmart/Library/Android/sdk/emulator:/usr/bin:/bin:/usr/sbin:/sbin:/Users/florentvilmart/bin

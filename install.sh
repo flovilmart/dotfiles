@@ -126,6 +126,8 @@ vim() {
 tmux_plugins() {
 	mkdir -p ${HOME}/.tmux/plugins
 	ln -sfn $(pwd)/tpm ${HOME}/.tmux/plugins
+	ln -sfn $(pwd)/scripts/open-project.sh ${HOME}/.tmux/open-project.sh
+	ln -sfn $(pwd)/scripts/preview-pane.sh ${HOME}/.tmux/preview-pane.sh
 }
 
 jira() {
