@@ -143,6 +143,11 @@ nushell() {
 	ln -sfn $(pwd)/nushell/config.nu "${NU_CONFIG}"
 	ln -sfn $(pwd)/nushell/scripts "${NU_CONFIG_DIR}/scripts"
 	ln -sfn $(pwd)/nushell/modules "${NU_CONFIG_DIR}/modules"
+  # Autoload (see nushell/README.md): nushell sources every *.nu in this directory after config.nu,
+  # in name order. It is a real directory, not in git: shared modules are links (dotclaude's below,
+  # skipped by nushell when ~/.claude is absent), machine-specific modules are files you add.
+  mkdir -p "${NU_CONFIG_DIR}/autoload"
+  ln -sfn "${HOME}/.claude/nu/shell/autoload.nu" "${NU_CONFIG_DIR}/autoload/00-dotclaude.nu"
 }
 
 starship() {

@@ -2,7 +2,8 @@
 # dev-entrypoint: prepare the slim dev-env container, then exec the command.
 #
 # 1. ~/.claude is a named volume (login, trust, sessions survive restarts). The
-#    config that lives in git (dotclaude: agents, skills, hooks, settings.json)
+#    config that lives in git (dotclaude: agents, skills, hooks, settings.json,
+#    workflows, nu modules)
 #    is symlinked into it from the dotfiles checkout, so the container runs the
 #    same agent workflow as the Mac without copying files around.
 # 2. Volta lives in a volume: Node and pnpm follow each project's pins and are
@@ -14,7 +15,9 @@ DOTCLAUDE_DIR="${DOTCLAUDE_DIR:-/root/src/flovilmart/dotfiles/.claude}"
 CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-/root/.claude}"
 mkdir -p "$CLAUDE_DIR"
 if [ -d "$DOTCLAUDE_DIR" ]; then
-  for entry in agents skills hooks docs output-styles settings.json CLAUDE.md; do
+  # workflows: the coordinator's saved workflows; nu: shared nushell modules (the watcher's
+  # OAuth, the shell's `linear` command)
+  for entry in agents skills hooks docs output-styles settings.json CLAUDE.md workflows nu; do
     if [ -e "$DOTCLAUDE_DIR/$entry" ]; then
       ln -sfn "$DOTCLAUDE_DIR/$entry" "$CLAUDE_DIR/$entry"
     fi
