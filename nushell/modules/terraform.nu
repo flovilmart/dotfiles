@@ -334,7 +334,7 @@ export def "del-variable" [key: string, --workspace: string, --all, --force] {
     echo ""
     let confirm = (input "Are you sure you want to delete these variables? (y/N): ")
 
-    if ($confirm | str downcase) != "y" {
+    if ($confirm | str lowercase) != "y" {
       echo "Deletion cancelled."
       return
     }

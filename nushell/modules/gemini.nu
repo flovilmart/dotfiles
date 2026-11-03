@@ -175,8 +175,8 @@ def exec_function_call [function_call] {
       return { name: $name, response: { name: $name, content: $res } }
     },
     "asana_api_post" => {
-      let res = (asana api post $args.url ($args.body | from json))
-      return { name: $name, response: { name: $name, content: $res } }
+      #let res = (asana api post $args.url ($args.body | from json))
+      #return { name: $name, response: { name: $name, content: $res } }
     }
   }
 }

@@ -20,10 +20,10 @@ export module config {
         "ASANA_DEBUG"
       },
       _ => {
-        if ($key | str upcase | str contains "_ID") {
-          $"ASANA_($key)" | str upcase
+        if ($key | str uppercase | str contains "_ID") {
+          $"ASANA_($key)" | str uppercase
         } else {
-          $"ASANA_($key)_ID" | str upcase
+          $"ASANA_($key)_ID" | str uppercase
         }
       }
     }
