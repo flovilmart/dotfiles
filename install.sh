@@ -61,6 +61,8 @@ dotfiles() {
 	ln -sfn $(pwd)/ghostty/config ${HOME}/.config/ghostty/config
   ln -sfn $(pwd)/ghostty/themes ${HOME}/.config/ghostty/themes
 	ln -sfn $(pwd)/ghostty/shaders ${HOME}/.config/ghostty/shaders
+	mkdir -p ${HOME}/.config/rex;
+	ln -sfn $(pwd)/rex/init.lua ${HOME}/.config/rex/init.lua
 }
 
 fix_nu_path() {
