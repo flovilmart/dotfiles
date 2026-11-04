@@ -106,3 +106,4 @@ use gemini.nu
 use mistral.nu
 use gh.nu
 use terraform.nu
+use plexer.nu
