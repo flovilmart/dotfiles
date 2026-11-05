@@ -20,8 +20,8 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { StringEnum } from "@earendil-works/pi-ai";
-import { DynamicBorder, type ExtensionAPI, type ExtensionContext } from "@earendil-works/pi-coding-agent";
-import { Container, Key, type SelectItem, SelectList, Text } from "@earendil-works/pi-tui";
+import { CustomEditor, DynamicBorder, type ExtensionAPI, type ExtensionContext } from "@earendil-works/pi-coding-agent";
+import { Container, Key, matchesKey, type SelectItem, SelectList, Text } from "@earendil-works/pi-tui";
 import { Type } from "typebox";
 import { type AgentConfig, discoverAgents } from "../subagent/agents.ts";
 
@@ -250,7 +250,41 @@ async function showAgentsOverlay(pi: ExtensionAPI, ctx: ExtensionContext): Promi
 	if (r.code !== 0) ctx.ui.notify(`Couldn't focus pane: ${(r.stderr || r.stdout).trim().slice(0, 160)}`, "error");
 }
 
+/**
+ * Editor that opens the agents overlay on `left` — but only when the input is
+ * empty and at least one agent has been launched. Any other time (text present,
+ * or no agents) `left` is ordinary cursor movement, so editing is never
+ * disrupted. This mirrors the Claude-Code left-arrow-on-empty gesture.
+ */
+class LeftArrowAgentsEditor extends CustomEditor {
+	constructor(
+		tui: ConstructorParameters<typeof CustomEditor>[0],
+		theme: ConstructorParameters<typeof CustomEditor>[1],
+		keybindings: ConstructorParameters<typeof CustomEditor>[2],
+		private readonly onLeftOnEmpty: () => void,
+	) {
+		super(tui, theme, keybindings);
+	}
+
+	handleInput(data: string): void {
+		if (matchesKey(data, "left") && this.getText() === "" && launched.length > 0) {
+			this.onLeftOnEmpty();
+			return;
+		}
+		super.handleInput(data);
+	}
+}
+
 export default function rexAgentsExtension(pi: ExtensionAPI) {
+	pi.on("session_start", (_event, ctx) => {
+		ctx.ui.setEditorComponent(
+			(tui, theme, keybindings) =>
+				new LeftArrowAgentsEditor(tui, theme, keybindings, () => {
+					void showAgentsOverlay(pi, ctx);
+				}),
+		);
+	});
+
 	pi.registerTool({
 		name: "spawn_agent",
 		label: "Spawn agent pane",
