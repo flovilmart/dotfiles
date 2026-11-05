@@ -25,7 +25,7 @@ format = "underwent [$duration](bold yellow)"
 disabled = false
 
 [kubernetes]
-disabled = false
+disabled = true
 style = "blue"
 format = '(\[$symbol[$context:$namespace]($style)\])'
 

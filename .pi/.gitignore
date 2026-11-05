@@ -1,0 +1,18 @@
+# Runtime + secrets live in the working tree (like ~/.claude) but never in git.
+agent/auth.json
+agent/models-store.json
+agent/trust.json
+agent/sessions/
+agent/bin/
+
+# Install-generated symlinks (recreated by install.sh's pi() from dotclaude).
+agent/AGENTS.md
+agent/skills/
+agent/agents/
+agent/extensions/
+
+# Machine-local overrides and temp files.
+agent/*.local.json
+*.tmp.*
+
+# Tracked: agent/settings.json

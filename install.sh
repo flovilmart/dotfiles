@@ -32,10 +32,82 @@ base()  {
   vim
   tmux_plugins
   claude
+  pi
 }
 
 claude() {
 	ln -sfn $(pwd)/.claude ${HOME}/.claude
+}
+
+# Wire dotclaude resources into the paths pi scans. CLAUDE.md and skills use
+# formats pi reads natively (context file + Agent Skills standard), so no plugin
+# is needed. rex is managed by "rex skill setup", so skip it to avoid a duplicate.
+pi() {
+	# Keep ~/.pi in the repo (like ~/.claude), so config is version controlled.
+	# One-time: migrate existing runtime state into the repo dir, then replace
+	# ~/.pi with a symlink. Secrets and generated state stay out of git via
+	# .pi/.gitignore; only agent/settings.json is tracked.
+	pi_src="$(pwd)/.pi"
+	mkdir -p "${pi_src}/agent"
+	if [ -e "${HOME}/.pi" ] && [ ! -L "${HOME}/.pi" ]; then
+		rsync -a "${HOME}/.pi/agent/" "${pi_src}/agent/"
+		mv "${HOME}/.pi" "${HOME}/.pi.pre-dotfiles.$(date +%Y%m%d%H%M%S)"
+	fi
+	ln -sfn "${pi_src}" "${HOME}/.pi"
+
+	mkdir -p ${HOME}/.pi/agent/skills ${HOME}/.pi/agent/agents ${HOME}/.pi/agent/extensions
+	ln -sfn ${HOME}/.claude/CLAUDE.md ${HOME}/.pi/agent/AGENTS.md
+	# Link every dir that holds a SKILL.md. This finds the nested "synced/<uuid>/<skill>"
+	# skills and skips non-skill dirs like the control-center plugin. rex is managed by
+	# "rex skill setup", so skip it to avoid a duplicate.
+	find -L ${HOME}/.claude/skills -maxdepth 4 -name SKILL.md -print0 | while IFS= read -r -d '' f; do
+		skill_dir=$(dirname "$f")
+		name=$(basename "$skill_dir")
+		[ "$name" = "rex" ] && continue
+		ln -sfn "$skill_dir" ${HOME}/.pi/agent/skills/"$name"
+	done
+	# Sub-agents: pi has no native sub-agent concept, so wire the shipped "subagent"
+	# example extension and expose the dotclaude agent defs to it. The extension reads
+	# ~/.pi/agent/agents/*.md, whose frontmatter matches the Claude agent format.
+	pi_pkg=$(ls -d ${HOME}/.volta/tools/image/packages/@earendil-works/pi-coding-agent/lib/node_modules/@earendil-works/pi-coding-agent 2>/dev/null | head -1)
+	if [ -n "$pi_pkg" ] && [ -d "$pi_pkg/examples/extensions/subagent" ]; then
+		mkdir -p ${HOME}/.pi/agent/extensions/subagent
+		ln -sfn "$pi_pkg/examples/extensions/subagent/index.ts" ${HOME}/.pi/agent/extensions/subagent/index.ts
+		# index.ts imports "./agents.ts"; use our vendored copy that treats
+		# `model: inherit` as "inherit parent model" instead of a model pattern.
+		ln -sfn $(pwd)/pi/subagent/agents.ts ${HOME}/.pi/agent/extensions/subagent/agents.ts
+	else
+		echo "pi: subagent example not found; skipping sub-agent wiring" >&2
+	fi
+	for f in ${HOME}/.claude/agents/*.md; do
+		[ -e "$f" ] || continue
+		ln -sfn "$f" ${HOME}/.pi/agent/agents/"$(basename "$f")"
+	done
+	# pi-only per-agent model overrides. The shared Claude agent files can't carry
+	# these (Claude Code can't target these providers), so replace the symlink with
+	# a generated copy whose frontmatter model: line is rewritten. Include a :off
+	# thinking suffix for models the subagent extension would otherwise run with a
+	# default thinking level they reject.
+	pi_agent_model security-reviewer "mistral/mistral-large-4:off"
+	# Fable is a pi-catalog Anthropic model Claude Code may not expose; keep it
+	# pi-only so the shared file stays Claude-valid (opus). slice-planner runs once
+	# per stack and is high-leverage, so it gets the premium frontier model.
+	pi_agent_model slice-planner "anthropic/claude-fable-5-1"
+}
+
+# Rewrite only the frontmatter `model:` line of a dotclaude agent into a pi copy.
+pi_agent_model() {
+	name="$1"; model="$2"
+	src="${HOME}/.claude/agents/${name}.md"
+	dst="${HOME}/.pi/agent/agents/${name}.md"
+	[ -f "$src" ] || return 0
+	rm -f "$dst"
+	awk -v m="$model" '
+		NR==1 && $0=="---" { infm=1; print; next }
+		infm && $0=="---" { if(!done){print "model: " m; done=1} infm=0; print; next }
+		infm && /^model:/ { print "model: " m; done=1; next }
+		{ print }
+	' "$src" > "$dst"
 }
 
 # Agent workflow toolchain on macOS (see .claude/docs/agent-workflow.md):
