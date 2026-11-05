@@ -79,6 +79,10 @@ pi() {
 	else
 		echo "pi: subagent example not found; skipping sub-agent wiring" >&2
 	fi
+	# rex-agents: our own extension to launch sub-agents in Rex panes and
+	# list/focus them (Ctrl+Shift+A). Imports ../subagent/agents.ts at runtime.
+	mkdir -p ${HOME}/.pi/agent/extensions/rex-agents
+	ln -sfn $(pwd)/pi/rex-agents/index.ts ${HOME}/.pi/agent/extensions/rex-agents/index.ts
 	for f in ${HOME}/.claude/agents/*.md; do
 		[ -e "$f" ] || continue
 		ln -sfn "$f" ${HOME}/.pi/agent/agents/"$(basename "$f")"
