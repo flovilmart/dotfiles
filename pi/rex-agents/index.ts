@@ -12,7 +12,7 @@
  *   Enter focuses the pane.
  *
  * Agent definitions and their resolved model/tools come from the shared
- * `../subagent/agents.ts` loader, so model aliases, `inherit`, and Claude tool
+ * `../lib/agents.ts` loader, so model aliases, `inherit`, and Claude tool
  * names are handled identically to the inline sub-agents.
  */
 
@@ -23,7 +23,7 @@ import { StringEnum } from "@earendil-works/pi-ai";
 import { CustomEditor, DynamicBorder, type ExtensionAPI, type ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { Container, Key, matchesKey, type SelectItem, SelectList, Text } from "@earendil-works/pi-tui";
 import { Type } from "typebox";
-import { type AgentConfig, discoverAgents } from "../subagent/agents.ts";
+import { type AgentConfig, discoverAgents } from "../lib/agents.ts";
 
 // Fallback when `rex` isn't on PATH in the shell pi spawns (Rex Beta on macOS).
 const REX_APP_BIN = "/Applications/Rex Beta.app/Contents/Helpers/Rex Server.rex/Contents/MacOS/rex";

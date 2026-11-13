@@ -75,14 +75,21 @@ pi() {
 		ln -sfn "$pi_pkg/examples/extensions/subagent/index.ts" ${HOME}/.pi/agent/extensions/subagent/index.ts
 		# index.ts imports "./agents.ts"; use our vendored copy that treats
 		# `model: inherit` as "inherit parent model" instead of a model pattern.
-		ln -sfn $(pwd)/pi/subagent/agents.ts ${HOME}/.pi/agent/extensions/subagent/agents.ts
+		ln -sfn $(pwd)/pi/lib/agents.ts ${HOME}/.pi/agent/extensions/subagent/agents.ts
 	else
 		echo "pi: subagent example not found; skipping sub-agent wiring" >&2
 	fi
-	# rex-agents: our own extension to launch sub-agents in Rex panes and
-	# list/focus them (Ctrl+Shift+A). Imports ../subagent/agents.ts at runtime.
-	mkdir -p ${HOME}/.pi/agent/extensions/rex-agents
-	ln -sfn $(pwd)/pi/rex-agents/index.ts ${HOME}/.pi/agent/extensions/rex-agents/index.ts
+	# Our own extensions: every pi/<name>/ holding an index.ts is linked whole
+	# (rex-agents: Rex-pane sub-agents; background-agents: non-blocking Agent and
+	# Workflow tools). pi/lib is the shared loader they import as ../lib/agents.ts.
+	ln -sfn $(pwd)/pi/lib ${HOME}/.pi/agent/extensions/lib
+	for dir in $(pwd)/pi/*/; do
+		name=$(basename "$dir")
+		[ -f "$dir/index.ts" ] || continue
+		target=${HOME}/.pi/agent/extensions/$name
+		[ -d "$target" ] && [ ! -L "$target" ] && rm -rf "$target"
+		ln -sfn "${dir%/}" "$target"
+	done
 	for f in ${HOME}/.claude/agents/*.md; do
 		[ -e "$f" ] || continue
 		ln -sfn "$f" ${HOME}/.pi/agent/agents/"$(basename "$f")"

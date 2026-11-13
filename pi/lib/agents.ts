@@ -7,8 +7,9 @@
  * the literal `model: inherit` sentinel; pi's example would otherwise pass it as a
  * model pattern and fail with "No models matching inherit".
  *
- * Symlinked into ~/.pi/agent/extensions/subagent/agents.ts by dotfiles install.sh,
- * next to the package's symlinked index.ts, which imports "./agents.ts".
+ * Shared by every pi extension in this repo (`../lib/agents.ts`). install.sh also links it
+ * into ~/.pi/agent/extensions/subagent/ for the package's symlinked index.ts, which
+ * imports "./agents.ts".
  */
 
 import * as fs from "node:fs";
@@ -92,6 +93,10 @@ const MODEL_ALIAS_MAP: Record<string, string> = {
  * the dispatching session's model", expressed by leaving `model` undefined. Bare
  * Claude aliases map to qualified pi IDs; anything else passes through verbatim.
  */
+export function resolveModelAlias(value: string): string {
+	return MODEL_ALIAS_MAP[value.trim().toLowerCase()] ?? value.trim();
+}
+
 function parseModel(value: unknown): string | undefined {
 	if (typeof value !== "string") return undefined;
 	const model = value.trim();
