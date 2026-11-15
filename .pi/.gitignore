@@ -16,3 +16,10 @@ agent/*.local.json
 *.tmp.*
 
 # Tracked: agent/settings.json
+
+# MCP adapter runtime state, generated config (absolute paths) and installed packages.
+agent/mcp-*.json
+agent/npm/
+
+# claude-compat local state (selected output style).
+agent/claude-compat.json
