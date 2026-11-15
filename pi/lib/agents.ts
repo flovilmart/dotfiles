@@ -59,9 +59,10 @@ const TOOL_NAME_MAP: Record<string, string | null> = {
 	glob: "find",
 	skill: null,
 	task: null,
-	todowrite: null,
-	webfetch: null,
-	websearch: null,
+	todowrite: "TodoWrite", // claude-compat extension
+	webfetch: "WebFetch",
+	websearch: "WebSearch",
+	lsp: "LSP",
 };
 
 function parseToolList(value: unknown): string[] | undefined {

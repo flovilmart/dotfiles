@@ -2,5 +2,12 @@
   "lastChangelogVersion": "0.84.4",
   "theme": "dark",
   "defaultProvider": "anthropic",
-  "defaultModel": "claude-sonnet-5-5"
+  "defaultModel": "claude-sonnet-5-5",
+  "packages": [
+    "npm:pi-mcp-adapter"
+  ],
+  "defaultThinkingLevel": "xhigh",
+  "modelThinkingLevels": {
+    "anthropic/claude-opus-5": "high"
+  }
 }

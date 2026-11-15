@@ -106,6 +106,20 @@ export default function (pi: ExtensionAPI) {
 		}
 	};
 
+	// Claude-style SubagentStart/SubagentStop for the claude-compat hooks extension.
+	const traced = async (agentType: string, run: () => Promise<AgentRunResult>): Promise<AgentRunResult> => {
+		const agent_id = crypto.randomUUID().replace(/-/g, "").slice(0, 17);
+		pi.events.emit("claude-compat:subagent", { phase: "start", agent_id, agent_type: agentType });
+		try {
+			const r = await run();
+			pi.events.emit("claude-compat:subagent", { phase: "stop", agent_id, agent_type: agentType, last_assistant_message: r.output });
+			return r;
+		} catch (e) {
+			pi.events.emit("claude-compat:subagent", { phase: "stop", agent_id, agent_type: agentType });
+			throw e;
+		}
+	};
+
 	const wake = (job: Job, text: string) => {
 		try {
 			pi.sendMessage(
@@ -221,11 +235,13 @@ export default function (pi: ExtensionAPI) {
 			};
 
 			if (!params.run_in_background) {
-				const result = await runAgentProcess({
-					...runOptions,
-					signal,
-					onActivity: (a) => onUpdate?.({ content: [{ type: "text", text: `(${a}...)` }], details: {} }),
-				});
+				const result = await traced(params.subagent_type ?? "general-purpose", () =>
+					runAgentProcess({
+						...runOptions,
+						signal,
+						onActivity: (a) => onUpdate?.({ content: [{ type: "text", text: `(${a}...)` }], details: {} }),
+					}),
+				);
 				const text = result.ok ? result.output || "(no output)" : `Agent failed: ${result.error}`;
 				return { content: [{ type: "text", text }], details: { usage: result.usage }, isError: !result.ok };
 			}
@@ -233,13 +249,15 @@ export default function (pi: ExtensionAPI) {
 			const job = newJob("agent", params.description);
 			job.done = (async () => {
 				const result = await semaphore.run(() =>
-					runAgentProcess({
-						...runOptions,
-						signal: job.abort.signal,
-						onActivity: (a) => {
-							job.activity = a;
-						},
-					}),
+					traced(params.subagent_type ?? "general-purpose", () =>
+						runAgentProcess({
+							...runOptions,
+							signal: job.abort.signal,
+							onActivity: (a) => {
+								job.activity = a;
+							},
+						}),
+					),
 				);
 				addUsage(job.usage, result.usage);
 				if (result.model) job.models.add(result.model);
@@ -324,7 +342,7 @@ export default function (pi: ExtensionAPI) {
 					addUsage(job.usage, r.usage);
 					if (r.model) job.models.add(r.model);
 				};
-				const result = await semaphore.run(() => runAgentProcess({ ...base, task, onActivity: (a) => (job.activity = `${options.label ?? options.agentType}: ${a}`) }));
+				const result = await semaphore.run(() => traced(options.agentType ?? "general-purpose", () => runAgentProcess({ ...base, task, onActivity: (a) => (job.activity = `${options.label ?? options.agentType}: ${a}`) })));
 				account(result);
 				if (!result.ok) {
 					job.log.push(`${options.label ?? options.agentType} failed: ${result.error}`);
